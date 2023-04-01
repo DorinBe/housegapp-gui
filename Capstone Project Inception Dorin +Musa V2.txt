@@ -1,20 +1,28 @@
 Explain the project's category in a few sentences (i.e., why it is a research/development project):
-The projects category is the research branch in the subject of deep learning model architecture. The subject is a novel way to produce professional floorplans without the need for an expensive professional architect. This is with an appropriate use of GAN – Generative Adversarial Network. 
+The projects category is the research branch in the subject of deep learning model architecture.
+The subject is a novel way to produce professional floorplans without the need for an expensive professional architect.
+This is with an appropriate use of GAN – Generative Adversarial Network. 
 
 Keywords (separated by commas):
-GAN, House floorplans, deep learning, image processing, Architecture, CNN, meta-optimization, iterative learning, RPLAN, Convolution
+GAN, House floorplans, deep learning, image processing, Architecture, CNN, meta-optimization, iterative learning,
+RPLAN, Convolution
 
 General Description of the problem:
-To make a professional floorplan design there is a need of the services of a professional architect with a lot of experience. The problem is as such as those architects are very expensive so that just 10% of the floorplan designed in North America with Professional Architects. The problem is computationally expensive and suggest an appropriate design tool.  
+To make a professional floorplan design there is a need of the services of a professional architect with a lot of experience.
+The problem is as such as those architects are very expensive so that just 10% of the floorplan designed in North America with
+Professional Architects. 
+The problem is computationally expensive and suggest an appropriate design tool.  
 
 Main Tools that will be used for solving the problem:
 GAN, TENSORFLOW, Architecture design
 
 Planned working process during the first semester:
 First of all, we are going to study the algorithmic skills applicated in this area
-The next step suggests an investigation of the GAN structure intended to deal with the problem and select the most appropriate within them. After, we suggest to construct and design a software system planned to implement the approach.   
+The next step suggests an investigation of the GAN structure intended to deal with the problem and select the 
+most appropriate within them. After, we suggest to construct and design a software system planned to implement the approach.   
 
 Product of the work of the first semester:
-The book will provide in-depth background, including clear explanations of terms related to neural networks. We will give a thorough study of the methods proposed the article.
+The book will provide in-depth background, including clear explanations of terms related to neural networks. 
+We will give a thorough study of the methods proposed the article.
 Our presentation will include a brief summary of the problem and provide solutions.
 We will present the needed models and algorithms.
