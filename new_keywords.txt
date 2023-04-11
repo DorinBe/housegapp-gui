@@ -1,3 +1,5 @@
+dnn - 
+
 cnn - input: input data -> convolutional layers -> pooling layers -> fully connected layers -> set of output classes
 convolutional layers - apply different filters on image to gain spatial hierarchies of simple shapes as edges and lines. output: feature maps
 pooling layers - input: feature maps, downsamples the feature maps, such as taking the maximum value or the average value of the elements in the area.
@@ -17,4 +19,15 @@ advantages of House-Gan++ over regular house-gan:
 * component wise GT-conditioning - a computationally affordable non-iterative training process for the generator
 * provides with the opportunity to further optimize the metrics by controlling when to pass which constraints
 
+Neural approach (one-step generation):
+1. DNN to train single step model generation 
+2. CNN for adding objects to the scene
+3. DNN for training scene graphs
+4. RNN for training outgoing edges from nodes (turtle)
+
 using functional graphs instead of adjacency graphs
+
+The key difference is that our system produces a structured model (as opposed to a raster image) and the training process 
+is non-sequential.
+
+segmentation masks - each pixel is labeled as belongs to background/etc..
