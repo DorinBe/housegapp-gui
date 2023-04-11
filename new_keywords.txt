@@ -31,3 +31,9 @@ The key difference is that our system produces a structured model (as opposed to
 is non-sequential.
 
 segmentation masks - each pixel is labeled as belongs to background/etc..
+
+There are three key differences in our architecture:
+1.  Edges in addition to nodes carry features for the generation of doors
+2. Each node/edge takes a 2D segmentation mask as an additional input constraint with an associated new loss.
+3. Conv-MPN feature pooling [32] is reformulated to allow feature-exchange between nodes and edges. 
+Conv-MPN is applying convolution on points of components and apply them on component neighbors. 
