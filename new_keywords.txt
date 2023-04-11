@@ -1,15 +1,20 @@
 cnn - input: input data -> convolutional layers -> pooling layers -> fully connected layers -> set of output classes
-colvolutional layers - apply different filters on image to gain spatial hirechies of simple shapes as edges and lines. output: feature mapes
+convolutional layers - apply different filters on image to gain spatial hierarchies of simple shapes as edges and lines. output: feature maps
 pooling layers - input: feature maps, downsamples the feature maps, such as taking the maximum value or the average value of the elements in the area.
 [spatial hierarchies - Spatial hierarchy refers to the way in which visual information is processed and represented in the human visual system, as well as in artificial neural networks like convolutional neural networks (CNNs). At the lowest level, visual information is represented in terms of simple features such as edges and corners. These features are then combined into increasingly complex representations of shapes and objects at higher levels of processing. In the context of CNNs, spatial hierarchy refers to the way in which convolutional filters are applied to input data, with early layers detecting simple features and later layers detecting more complex patterns built from those basic features. By learning these spatial hierarchies of features, CNNs are able to effectively process and classify complex visual information.]
 fully connected layer - perform the final classification or regression step, mapping the extracted features to a set of output classes.
 
 GAN - Discriminator and Generator. The "looser" updates its' model.
-conditional-GAN - the generator might be constrained to produce graphs with a similar number of nodes and edges as the input graph, or to preserve certain properties of the input graph such as node degree or connectivity.
-
+conditional-GAN - the generator might be constrained to produce graphs with a similar number of nodes and edges as the input graph, 
+or to preserve certain properties of the input graph such as node degree or connectivity.
+the architecture combines relational GAN and cGAN.
+relational - i want bathroom attached to sleeping room
+conditional - i want the sleeping room to have bed of 2m
 
 advantages of House-Gan++ over regular house-gan:
 * generating doors
 * handling non rectangle room shapes
+* component wise GT-conditioning - a computationally affordable non-iterative training process for the generator
+* provides with the opportunity to further optimize the metrics by controlling when to pass which constraints
 
 using functional graphs instead of adjacency graphs
