@@ -88,8 +88,12 @@ to measure the difference or distance between predicted values and ground truth 
 Loss function: When the segmentation mask is specified, an L1-loss is enforced between the generated mask and the condition image. 
 The loss function includes the original generator adversarial loss (Lorg) from House-GAN and the L1-loss term, with a weight (λ) of 1000.
 
-Conv-MPN pooling: Conv-MPN (Convolutional Message Passing Networks) pooling is defined based on the connectivity of the relational graph. 
-It involves exchanging features between neighboring components (rooms and doors) based on a CNN-based pooling mechanism.
-Component-wise GT-conditional training: The training strategy in House-GAN is similar to "masking" in natural language processing (NLP). 
-In each training step, a ground-truth layout is randomly picked, a relational graph is initialized based on its bubble-diagram, 
-and a ground-truth segmentation mask is specified for training.
+Conv-MPN pooling: It is defined based on the connectivity of the relational graph. 
+It involves exchanging features between neighboring components (rooms and doors) based on a CNN-based pooling mechanism and than upsample the feature
+volume three times, producing segmentation mask of 64 × 64 resolution.
+
+Component-wise GT-conditional training:
+In each training step, we pick a ground-truth layout at random, initialize a relational graph with its bubble-diagram, 
+then specify a ground-truth segmentation mask as the input condition for each room/door with a 50% chance. 
+This strategy forces the generator to either create a whole layout when few GT conditions are specified, 
+or simply inpaint the missing components when many GT conditions are given.
