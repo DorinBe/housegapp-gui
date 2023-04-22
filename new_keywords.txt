@@ -30,10 +30,66 @@ using functional graphs instead of adjacency graphs
 The key difference is that our system produces a structured model (as opposed to a raster image) and the training process 
 is non-sequential.
 
-segmentation masks - each pixel is labeled as belongs to background/etc..
+segmentation masks -  It is expected to remain unchanged during the generation process, as mentioned in the data block. 
+The segmentation mask is used as a condition to guide the generator in generating realistic scenes with appropriate spatial layout and structure.
 
 There are three key differences in our architecture:
 1.  Edges in addition to nodes carry features for the generation of doors
 2. Each node/edge takes a 2D segmentation mask as an additional input constraint with an associated new loss.
-3. Conv-MPN feature pooling [32] is reformulated to allow feature-exchange between nodes and edges. 
+3. Conv-MPN is a network. feature pooling [32] is reformulated to allow feature-exchange between nodes and edges. [1]
 Conv-MPN is applying convolution on points of components and apply them on component neighbors. 
+examples of feature pooling: max pooling (picking max value in a range of pixels)
+                             average pooling, etc..
+convolution is the process of applying filters to pixels.
+one hot vecotr [2] - a vector where each time only one bit is active an the others are inactive
+
+[3] noise vector- The noise vector is used as an initial input for each node in the relational generator.
+A converted condition image (with 3layer -CNN) is concatenated to that feature volume.
+By incorporating random noise through the noise vector, 
+the generative model can produce diverse and realistic scenes,
+explore different options during the generation process,
+with different configurations or layouts.
+
+
+
+
+Summary - Architecture - Key Differences:
+The networks' backbone is conv-MPN[1] which gets a relational graph of constraints (the bubble diagram).
+
+Use of Conv-MPN which is a type of graph neural network that uses convolutional layers in a message passing framework between edges and nodes, 
+allowing for feature extraction from the relational graph structure[bubble diagram]. Each node/edge takes a 2D
+segmentation mask as an additional input constraint with an associated new loss.
+For ex. edges also carry features for the generation of doors.
+In House-GAN++ Conv-MPN feature pooling is reformulated to allow feature exchange between nodes and edges.
+
+Edge features:
+has 12-d one-hot[2] vector where the first 10 bits represent the room type and the other two represent the door type.
+the generation of door by edge is the same as the generation of room by node except for the process of the pooling mechanism.
+
+Mask-Condition:
+The generator arguments:
+House gan++ creates 8x8x16 feature volume constructed of the one-hot vector and random noise vector.[3]
+to that feature volume we concatenate another volume which we will call the condition volume.
+the condition volume is 64x64x2 of relational condition image, it has 2 channels, first is the segmentation channel, second specifies wether the segmentation mask was provided.
+    The condition volume exists for each node/vertex.
+    It is converted to 8x8x16 with 3-layer CNN.
+Loss function: When the segmentation mask is specified, an L1-loss is enforced between the generated mask and the condition image.
+to measure the difference or distance between predicted values and ground truth values
+
+
+#Mask condition: Each node in House-GAN is initialized with a noise vector and a room type, 
+#which is transformed into an 8x8x16 feature volume. 
+#The relational generator takes in an additional 64x64x2 condition image for each node/edge.
+#The first channel of the condition image provides the segmentation mask, 
+#while the second channel indicates whether the segmentation mask is specified or not (1 for specified, 0 otherwise).
+#A 3-layer CNN is used to convert the condition image to an 8x8x16 feature volume,
+#which is then concatenated to the original feature.
+
+Loss function: When the segmentation mask is specified, an L1-loss is enforced between the generated mask and the condition image. 
+The loss function includes the original generator adversarial loss (Lorg) from House-GAN and the L1-loss term, with a weight (λ) of 1000.
+
+Conv-MPN pooling: Conv-MPN (Convolutional Message Passing Networks) pooling is defined based on the connectivity of the relational graph. 
+It involves exchanging features between neighboring components (rooms and doors) based on a CNN-based pooling mechanism.
+Component-wise GT-conditional training: The training strategy in House-GAN is similar to "masking" in natural language processing (NLP). 
+In each training step, a ground-truth layout is randomly picked, a relational graph is initialized based on its bubble-diagram, 
+and a ground-truth segmentation mask is specified for training.
