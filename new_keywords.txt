@@ -98,3 +98,9 @@ In each training step, we pick a ground-truth layout at random, initialize a rel
 then specify a ground-truth segmentation mask as the input condition for each room/door with a 50% chance. 
 This strategy forces the generator to either create a whole layout when few GT conditions are specified, 
 or simply inpaint the missing components when many GT conditions are given.
+
+Metric-Optimization:
+Our50%Hueristic - provide the segmentation mask and it is accepted 50% of the time.
+Our100%Huresitic - provide the segmentation mask all the time
+Static - design specific room.s before other room.s
+Dynamic - design specific room.s before other room.s but take into consideration their compatibility of the current model with the bubble diagram
