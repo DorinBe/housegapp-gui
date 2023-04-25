@@ -50,6 +50,7 @@ the generative model can produce diverse and realistic scenes,
 explore different options during the generation process,
 with different configurations or layouts.
 
+FID - used to evaluate the diversity or quality of generated images 
 
 
 
