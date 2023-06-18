@@ -24,6 +24,7 @@ MAX_X, MAX_Y = 1400, 800
 
 # tabs globals
 ad_new_tab_flag = False
+admin_flag = False
 
 
 class StartGUI(ttk.Frame):
@@ -41,6 +42,7 @@ class StartGUI(ttk.Frame):
         self.vars = []
         self.btns = [ttk.Checkbutton()]
         self.num_of_rooms = 0
+        self.entries = None
 
         self.main_frame = MainFrame.CreateMainFrame(self.main_window)
         self.ab = AppBoot.AppBoot(self.main_frame.message_label_middle)
@@ -59,6 +61,7 @@ class StartGUI(ttk.Frame):
                                               state='disabled')
         self.main_frame.settings_btn.configure(command=self.settings_button, state='disabled')
         self.main_frame.download_btn.configure(command="", state='disabled')
+        self.main_frame.signin_btn.configure(command=self.signin_button)
 
         self.selected.set(-1)
 
@@ -118,6 +121,38 @@ class StartGUI(ttk.Frame):
                 # raise a pop up erroring for the user that he didn't input a number and go back to the main window
                 messagebox.showerror(message="Please input a number")
                 return
+            
+            # create a new window
+            self.new_window = tk.Toplevel(self.main_window)
+            self.new_window.iconbitmap("house_icon-removebg-preview.ico")
+            # create a new frame
+            self.new_frame = tk.Frame(self.new_window)
+            self.new_frame.grid(row=0, column=0, sticky='nsew')
+            ttk.Label(self.new_frame, text="Please initialize the refinement scheme mode if necessary").grid(row=0, columnspan=(self.num_of_rooms+4*2))
+
+            room_numer=1
+            out_i = 0
+            for i in range(0,self.num_of_rooms+4,2):
+                ttk.Label(self.new_frame, text="Room " + str(room_numer)).grid(row=1, column=i, sticky='w')
+                ttk.Entry(self.new_frame, width=10).grid(row=1, column=i+1, sticky='w')
+                room_numer+=1
+                out_i = i 
+            ttk.Label(self.new_frame, text="In doors").grid(row=1, column=out_i, sticky='w')
+            ttk.Entry(self.new_frame, width=10).grid(row=1, column=out_i+1, sticky='w')
+            ttk.Label(self.new_frame, text="Out doors").grid(row=1, column=out_i+2, sticky='w')
+            ttk.Entry(self.new_frame, width=10).grid(row=1, column=out_i+3, sticky='w')
+            room_numer=1
+            for i in range(0,self.num_of_rooms+4,2):
+                ttk.Label(self.new_frame, text="Room " + str(room_numer)).grid(row=2, column=i, sticky='w')
+                ttk.Entry(self.new_frame, width=10).grid(row=2, column=i+1, sticky='w')
+                room_numer+=1
+                out_i = i 
+            ttk.Label(self.new_frame, text="In doors").grid(row=2, column=out_i, sticky='w')
+            ttk.Entry(self.new_frame, width=10).grid(row=2, column=out_i+1, sticky='w')
+            ttk.Label(self.new_frame, text="Out doors").grid(row=2, column=out_i+2, sticky='w')
+            ttk.Entry(self.new_frame, width=10).grid(row=2, column=out_i+3, sticky='w')
+            ttk.Button(self.new_frame, text="OK", command=self.new_window.destroy, style="Blue.TButton").grid(row=3, columnspan=(self.num_of_rooms+4*2))
+            
             
 
             t = PcapLogic.AsyncPcap2Bin(self.path, dest_port, self.main_frame.message_label_middle)
@@ -191,6 +226,64 @@ class StartGUI(ttk.Frame):
             self.create_sites_tab()  # tab[0]
             self.create_settings_tab()  # tab[1]
         self.notebook_settings.grid(row=0, column=0, sticky="nswe")
+
+    def signin_button(self):
+        self.selected.set(-1)
+
+        # create pop up window of sign in
+        self.signin_window = tk.Toplevel(self.main_window)
+        self.signin_window.title("Sign in")
+        # self.signin_window.geometry("350x200")
+        self.signin_window.resizable(False, False)
+
+        # create a frame for the sign in window
+        self.signin_frame = ttk.Frame(self.signin_window, style='Custom.TFrame')
+        self.signin_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")  # Add some padding
+        self.signin_frame.grid_columnconfigure(0, weight=1)  # Make the frame stretch when resizing
+        self.signin_frame.grid_rowconfigure(0, weight=1)  # Make the frame stretch when resizing
+        self.signin_frame.grid_propagate(True)  # Disable resizing the frame
+
+        # create a label for the sign in window
+        self.signin_label = ttk.Label(self.signin_frame, style="Settings.TLabel", text="Sign in", font=("Helvetica", 16))
+        self.signin_label.grid(row=0, column=0, columnspan=2, padx=(20,20), pady=(20,20))  # Let it span 2 columns and align to left
+
+        # create a label for the username
+        self.username_label = ttk.Label(self.signin_frame, style="Settings.TLabel", text="Username", font=("Helvetica", 12))
+        self.username_label.grid(row=1, column=0, sticky="w", padx=(20,20), pady=(0,0))  # Align to left
+
+        # create a label for the password
+        self.password_label = ttk.Label(self.signin_frame, style="Settings.TLabel", text="Password", font=("Helvetica", 12))
+        self.password_label.grid(row=2, column=0, sticky="w", padx=(20,20), pady=(0,20))  # Align to left
+
+        # create a entry for the username
+        self.username_entry = ttk.Entry(self.signin_frame, style="Settings.TEntry", font=("Helvetica", 12))
+        self.username_entry.grid(row=1, column=1, sticky="e", padx=(0,20), pady=(0,0))  # Align to right
+
+        # create a entry for the password
+        self.password_entry = ttk.Entry(self.signin_frame, style="Settings.TEntry", font=("Helvetica", 12))
+        self.password_entry.grid(row=2, column=1, sticky="e", padx=(0,20), pady=(0,20))  # Align to right
+
+        # create a button for the sign in
+        self.login_btn = ttk.Button(self.signin_frame, style="Blue.TButton", text="Login", command=self.login)
+        self.login_btn.grid(row=3, column=0, columnspan=2, padx=(20,20), pady=(0,20))  # Let it span 2 columns and align to right
+        
+    def login(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        if username == "admin" and password == "admin":
+            self.signin_window.destroy()
+            self.main_frame.settings_btn['state'] = 'normal'
+            self.main_frame.download_btn['state'] = 'normal'
+            self.main_frame.plots_radio['state'] = 'normal'
+            self.main_frame.signin_btn['style'] = 'Green.TButton'
+            self.add_train_model_button()
+        else:
+            messagebox.showerror("Error", "Wrong username or password")
+
+    def add_train_model_button(self):
+        self.main_frame.train_model_btn.grid(row=6, column=0, padx=5, pady=5)
+
 
     def create_sites_tab(self):
         frame = MyFrame(self.notebook_settings)

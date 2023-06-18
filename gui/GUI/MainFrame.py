@@ -34,6 +34,12 @@ class CreateMainFrame(ttk.Frame):
         self.plots_radio = ttk.Radiobutton(self.left_frame, text='Rooms\t', width=10, style='Blue.TRadiobutton')
         self.download_btn = ttk.Button(self.left_frame, text='Download', width=10, style="Blue.TButton")
         self.settings_btn = ttk.Button(self.left_frame, text='Settings', width=10, style="Blue.TButton")
+        self.signin_btn = ttk.Button(self.left_frame, text='Sign in', width=10, style="Blue.TButton")
+        self.train_model_btn = ttk.Button(self.left_frame, text='Train Model', width=10, style="Blue.TButton")
+        info_image = tk.PhotoImage(file='info.png')
+        self.info_btn = ttk.Button(self.left_frame, text='Info', width=10, style="Blue.TButton", image=info_image)
+
+
 
         self.path_label_left = tk.Label(self.path_frame, bg="#e6e6e6", fg="black", text="", padx=10)
         self.path_label_middle = tk.Label(self.path_frame, bg="#e6e6e6", fg="black", text="", font='Arial 15')
@@ -97,3 +103,5 @@ class CreateMainFrame(ttk.Frame):
         self.plots_radio.grid(row=1, column=0, padx=5, pady=5)
         self.download_btn.grid(row=3, column=0, padx=5, pady=5)
         self.settings_btn.grid(row=4, column=0, padx=5, pady=5)
+        self.signin_btn.grid(row=5, column=0, padx=5, pady=5)
+        self.info_btn.grid(row=7, column=0, padx=5, pady=5)
