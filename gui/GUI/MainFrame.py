@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk as ttk
-
+from GUI.Styles import PinkPallete as P
 from PIL import Image, ImageTk
 
 
@@ -22,11 +22,12 @@ class CreateMainFrame(ttk.Frame):
         self.background2_image  = ImageTk.PhotoImage(self.background2_image)
 
         # frames
-        self.top_frame = tk.Frame(self.parent)
+        self.top_frame = tk.Frame(self.parent, bg=str(P.get(1)))
         self.left_frame = tk.Frame(self.parent, bg="#d8d8d8", pady=15)
         self.right_frame = tk.Frame(self.parent, bg="white")
-        self.path_frame = tk.Frame(self.parent, bg="#e6e6e6")
-        self.message_frame = tk.Frame(self.parent, bg="#e6e6e6")
+        self.path_frame = tk.Frame(self.parent, bg=str(P.get(2)))
+        self.message_frame = tk.Frame(self.parent, bg=str(P.get(2)))
+        self.center_frame = tk.Frame(self.parent, bg=str(P.get(1)))
 
         # buttons
         self.load_bubble_diagram_btn = ttk.Button(master=self.left_frame, text="Load  Bubble Diagram", width=20, style='Blue.TButton')
@@ -38,21 +39,20 @@ class CreateMainFrame(ttk.Frame):
         self.train_model_btn = ttk.Button(self.left_frame, text='Train Model', width=10, style="Blue.TButton")
         info_image = tk.PhotoImage(file='info.png')
         self.info_btn = ttk.Button(self.left_frame, text='Info', width=10, style="Blue.TButton", image=info_image)
+        
+        self.path_label_left = tk.Label(self.path_frame, bg=str(P.get(2)), fg="black", text="", padx=10)
+        self.path_label_middle = tk.Label(self.path_frame, bg=str(P.get(2)), fg="black", text="", font='Arial 15')
+        self.path_label_right = tk.Label(self.path_frame, bg=str(P.get(2)), fg="black", text="")
 
-
-
-        self.path_label_left = tk.Label(self.path_frame, bg="#e6e6e6", fg="black", text="", padx=10)
-        self.path_label_middle = tk.Label(self.path_frame, bg="#e6e6e6", fg="black", text="", font='Arial 15')
-        self.path_label_right = tk.Label(self.path_frame, bg="#e6e6e6", fg="black", text="")
-
-        self.message_label_left = tk.Label(self.message_frame, bg="#e6e6e6", fg="green", text="", padx=10)
-        self.message_label_middle = tk.Label(self.message_frame, bg="#e6e6e6", fg="green", text="",
+        self.message_label_left = tk.Label(self.message_frame, bg=str(P.get(2)), fg="green", text="", padx=10)
+        self.message_label_middle = tk.Label(self.message_frame, bg=str(P.get(2)), fg="green", text="",
                                              font='Arial 15 bold')
-        self.message_label_right = tk.Label(self.message_frame, bg="#e6e6e6", fg="green", text="")
+        self.message_label_right = tk.Label(self.message_frame, bg=str(P.get(2)), fg="green", text="")
 
-        self.background1_label = tk.Label(self.top_frame, fg="#0061A1", image=self.background1_image)
-        self.bg_logo = tk.Label(self.top_frame, image=self.image_smting)
-        self.background2_label = tk.Label(self.top_frame, fg="#0061A1", image=self.background2_image)
+        
+        self.background1_label = tk.Label(self.top_frame, bg=str(P.get(1)), image=self.background1_image)
+        self.bg_logo = tk.Label(self.top_frame, image=self.image_smting,bg=str(P.get(1)))
+        self.background2_label = tk.Label(self.top_frame, bg=str(P.get(1)), image=self.background2_image)
 
         self.create_main_frame()
 
@@ -71,8 +71,10 @@ class CreateMainFrame(ttk.Frame):
         self.bg_logo.grid(row=0, column=1)
         self.background2_label.grid(row=0, column=2)
 
-        self.left_frame.grid(row=3, rowspan=2, column=0, sticky="nsew")
-        self.left_frame.columnconfigure(0, weight=1)
+        # self.left_frame.grid(row=3, rowspan=2, column=0, sticky="nsew")
+        # self.left_frame.columnconfigure(0, weight=1)
+
+        self.center_frame.grid(row=3, column=0, columnspan=3, sticky="nswe")
 
         self.right_frame.grid(row=3, column=1, columnspan=2, sticky="nswe")
         self.right_frame.grid_columnconfigure(0, weight=1)

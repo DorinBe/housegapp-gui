@@ -45,12 +45,14 @@ class StartGUI(ttk.Frame):
         self.entries = None
 
         self.main_frame = MainFrame.CreateMainFrame(self.main_window)
-        self.ab = AppBoot.AppBoot(self.main_frame.message_label_middle)
+        # self.ab = AppBoot.AppBoot(self.main_frame.message_label_middle)
         self.initial_program()
 
         # Notebooks
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
         self.notebook_settings = AppWidgets.MyNotebook(self.main_frame.right_frame)
+
+        show_hello_message(self)
 
     def initial_program(self):
         # set functionalities to buttons
@@ -415,3 +417,39 @@ def place_center(w1, width, height):  # Placing the window in the center of the 
     width_str = str(width)
     height_str = str(height)
     w1.geometry(width_str + "x" + height_str + "+" + str(x) + "+" + str(y))
+
+def show_hello_message(self):
+    from GUI.Styles import PinkPallete as P
+    text_frame = tk.Frame(self.main_frame.center_frame, bg=str(P.get(1)))
+    button_frame = tk.Frame(self.main_frame.center_frame, bg=str(P.get(1)))
+
+    text_frame.grid(row=0, sticky="nswe")
+    button_frame.grid(row=1, sticky="nswe")
+    text_frame.grid_columnconfigure(0, weight=1)
+    text_frame.grid_rowconfigure(0, weight=1)
+    text_frame.grid_rowconfigure(1, weight=1)
+    button_frame.grid_columnconfigure(0, weight=1)
+    # button_frame.grid_columnconfigure(1, weight=1)
+    button_frame.grid_columnconfigure(2, weight=1)
+    button_frame.grid_rowconfigure(0, weight=1)
+
+
+    self.main_frame.center_frame.grid_columnconfigure(0, weight=1)
+    # self.main_frame.center_frame.grid_rowconfigure(0, weight=2)
+    # self.main_frame.center_frame.grid_rowconfigure(1, weight=1)
+
+    hello_label = ttk.Label(text_frame, text="Hello =)", style="Hello.TLabel", anchor="n")
+    welcome_label = ttk.Label(text_frame, text="Welcome to automatic floorplan generator!\n \tWould you like to do?", style="Welcome.TLabel", anchor="n")
+    play_btn = ttk.Button(button_frame, text="Play with Bubble diagram", style="Pink.TButton")
+    upload_btn = ttk.Button(button_frame, text="Upload Bubble diagram", style="Pink.TButton")
+    login_btn = ttk.Button(button_frame, text="Login", style="Pink.TButton", command=lambda: self.login())
+
+    hello_label.grid(row=0, column=0, sticky="n",pady=(40,40))
+    welcome_label.grid(row=1, column=0, sticky="n")
+
+    play_btn.grid(row=0, column=0, sticky="n", padx=(400,0), pady=40)
+    upload_btn.grid(row=0, column=1, sticky="n", pady=40)
+    login_btn.grid(row=0, column=2, sticky="n",padx=(0,400), pady=40)
+
+
+    messagebox.showinfo("Hello =)", "Welcome to automatic floorplan generator!\n Would you like to")
