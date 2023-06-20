@@ -21,7 +21,7 @@ class AsyncPcap2Bin(Thread):
         self.counter += 1
         self.counter %= 3
         if PcapLogic.stop_pcap_bool:
-            self.master.config(text="Finished Analyzing Input buuble diagram")
+            self.master.config(text="Finished generating floor plan")
             return
         self.master.after(1000, self.change_text)
 

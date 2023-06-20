@@ -27,18 +27,18 @@ class CreateMainFrame(ttk.Frame):
         self.right_frame = tk.Frame(self.parent, bg="white")
         self.path_frame = tk.Frame(self.parent, bg=str(P.get(2)))
         self.message_frame = tk.Frame(self.parent, bg=str(P.get(2)))
-        self.center_frame = tk.Frame(self.parent, bg=str(P.get(1)))
+        # self.center_frame = tk.Frame(self.parent, bg=str(P.get(1)))
 
         # buttons
-        self.load_bubble_diagram_btn = ttk.Button(master=self.left_frame, text="Load  Bubble Diagram", width=20, style='Blue.TButton')
+        self.load_bubble_diagram_btn = ttk.Button(master=self.left_frame, text="Load  Bubble Diagram", width=20, style='Pink.TButton')
         self.stop_analyzing_btn = ttk.Button(master=self.left_frame,width=3, style='Stop.TButton')
-        self.plots_radio = ttk.Radiobutton(self.left_frame, text='Rooms\t', width=10, style='Blue.TRadiobutton')
-        self.download_btn = ttk.Button(self.left_frame, text='Download', width=10, style="Blue.TButton")
-        self.settings_btn = ttk.Button(self.left_frame, text='Settings', width=10, style="Blue.TButton")
-        self.signin_btn = ttk.Button(self.left_frame, text='Sign in', width=10, style="Blue.TButton")
-        self.train_model_btn = ttk.Button(self.left_frame, text='Train Model', width=10, style="Blue.TButton")
+        self.plots_radio = ttk.Radiobutton(self.left_frame, text='Rooms\t', width=10, style='Pink.TRadiobutton')
+        self.download_btn = ttk.Button(self.left_frame, text='Download', width=10, style="Pink.TButton")
+        self.settings_btn = ttk.Button(self.left_frame, text='Settings', width=10, style="Pink.TButton")
+        self.signin_btn = ttk.Button(self.left_frame, text='Sign in', width=10, style="Pink.TButton")
+        self.train_model_btn = ttk.Button(self.left_frame, text='Train Model', width=10, style="Pink.TButton")
         info_image = tk.PhotoImage(file='info.png')
-        self.info_btn = ttk.Button(self.left_frame, text='Info', width=10, style="Blue.TButton", image=info_image)
+        self.info_btn = ttk.Button(self.left_frame, text='Info', width=10, style="Pink.TButton", image=info_image)
         
         self.path_label_left = tk.Label(self.path_frame, bg=str(P.get(2)), fg="black", text="", padx=10)
         self.path_label_middle = tk.Label(self.path_frame, bg=str(P.get(2)), fg="black", text="", font='Arial 15')
@@ -71,10 +71,10 @@ class CreateMainFrame(ttk.Frame):
         self.bg_logo.grid(row=0, column=1)
         self.background2_label.grid(row=0, column=2)
 
-        # self.left_frame.grid(row=3, rowspan=2, column=0, sticky="nsew")
-        # self.left_frame.columnconfigure(0, weight=1)
+        self.left_frame.grid(row=3, rowspan=2, column=0, sticky="nsew")
+        self.left_frame.columnconfigure(0, weight=1)
 
-        self.center_frame.grid(row=3, column=0, columnspan=3, sticky="nswe")
+        # self.center_frame.grid(row=3, column=0, columnspan=3, sticky="nswe")
 
         self.right_frame.grid(row=3, column=1, columnspan=2, sticky="nswe")
         self.right_frame.grid_columnconfigure(0, weight=1)

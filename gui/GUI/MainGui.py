@@ -7,6 +7,8 @@ from tkinter.filedialog import askopenfilename
 from tkinter.scrolledtext import ScrolledText
 from tkinter.ttk import Entry
 from Logic.ConfigParser import ConfigParser
+from PIL import ImageTk
+from PIL import Image
 
 import matplotlib.backends.backend_tkagg as tkagg
 import pyautogui as pg
@@ -52,20 +54,27 @@ class StartGUI(ttk.Frame):
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
         self.notebook_settings = AppWidgets.MyNotebook(self.main_frame.right_frame)
 
-        show_hello_message(self)
+        # show_hello_message(self)
 
     def initial_program(self):
         # set functionalities to buttons
         self.main_frame.load_bubble_diagram_btn.configure(
-            command=lambda: self.open_file(extension='*.*', dest_port=self.ab.dest_port))
+            command=lambda: self.open_file(extension='*.*', dest_port=''))
         self.main_frame.stop_analyzing_btn.configure(command=self.stop_threads)
         self.main_frame.plots_radio.configure(value=1, variable=self.selected, command=self.show_selected_size,
                                               state='disabled')
         self.main_frame.settings_btn.configure(command=self.settings_button, state='disabled')
-        self.main_frame.download_btn.configure(command="", state='disabled')
+        self.main_frame.download_btn.configure(command=self.download, state='disabled')
         self.main_frame.signin_btn.configure(command=self.signin_button)
 
         self.selected.set(-1)
+
+    def download(self):
+        # get the image from the label
+        image = self.floor_plan_label['image'][0]
+        image.save('floor_plan.png')
+
+
 
     def stop_threads(self):
         print("thread list: ", thread_list := threading.enumerate())
@@ -263,41 +272,18 @@ class StartGUI(ttk.Frame):
         self.selected.set(1)
         self.notebook_settings.grid_remove()
 
-        if self.notebook_plots.counter == 0:
-            # data = PcapLogic.deciphered_bin_df
-            # stay_names = AppBoot.sites_dict.get('sites').split(':')
+        frame = MyFrame(self.notebook_plots)
+        self.notebook_plots.tabs.append(frame)
+        self.notebook_plots.add(frame, text="Floor Plan")    
 
-            # show columns of stay_names
-            # remove = data.drop(columns=data.columns.difference(other=stay_names), axis=1, inplace=False)
-            # length = math.ceil(len(stay_names) / 20)  # round up
-
-            for i in range(0, self.num_of_rooms+1):
-                frame = MyFrame(self.notebook_plots)
-
-                self.notebook_plots.tabs.append(frame)
-
-                if i is 0:
-                    self.notebook_plots.add(frame, text="All")    
-                else:
-                    self.notebook_plots.add(frame, text="Room " + str(i))
-
-                # pick_sites_label = ttk.Label(frame, style="Settings.TLabel", text=pick_sites_text, font=("Helvetica", 12))
-                text = ttk.Label(frame, style="Settings.TLabel", text="Your floorplan here", font=("Helvetica", 32))
-                text.grid(row=0, column=1, sticky="nswe")
-
-                # fig, ax = plt.subplots()
-                # fig = plt.text(0.5, 0.5, "Your floorplan here", horizontalalignment='center', verticalalignment='center',)
-                # canvas = tkagg.FigureCanvasTkAgg(fig, master=frame)
-                # canvas.get_tk_widget().grid(row=0, column=0, sticky="nswe")
-                # canvas.get_tk_widget().grid_columnconfigure(0, weight=1)
-                # toolbar = tkagg.NavigationToolbar2Tk(canvas, frame, pack_toolbar=False)
-                # toolbar.update()
-                # toolbar.grid(row=2, column=0)
-                # y = remove.iloc[:1].values[0]
-                # plt.barh((remove.columns.values[20 * i:20 * i + 20]), y[20 * i:20 * i + 20], color="#73B8FA",
-                #          edgecolor="#73B8FA")
-
-                self.notebook_plots.counter += 1
+        # pick_sites_label = ttk.Label(frame, style="Settings.TLabel", text=pick_sites_text, font=("Helvetica", 12))
+        # show 'floorplan.png' in the frame
+        self.img = ImageTk.PhotoImage(Image.open("floorplan.png"))
+        self.floor_plan_label = ttk.Label(frame, image=self.img)
+        self.floor_plan_label.grid(row=0, column=0)
+        # floor_plan_label.grid_columnconfigure(0, weight=1)
+        # floor_plan_label.grid_rowconfigure(0, weight=1)
+        # self.notebook_plots.counter += 1
 
         self.main_frame.plots_radio['state'] = 'normal'
         self.main_frame.download_btn['state'] = 'normal'
@@ -512,7 +498,7 @@ def place_center(w1, width, height):  # Placing the window in the center of the 
 
 def show_hello_message(self):
     from GUI.Styles import PinkPallete as P
-    self.main_frame.message_label_middle.config(text="Model is training, this may take a while...")
+    self.main_frame.message_label_middle.config(text="Finished generating floor plan")
     text_frame = tk.Frame(self.main_frame.center_frame, bg=str(P.get(1)))
     button_frame = tk.Frame(self.main_frame.center_frame, bg=str(P.get(1)))
 
@@ -537,7 +523,8 @@ def show_hello_message(self):
     upload_btn = ttk.Button(button_frame, text="Upload Bubble diagram", style="Pink.TButton", width=25, 
                             command=lambda: self.open_file(extension='*.*', dest_port=''))
     login_btn = ttk.Button(button_frame, text="Login", style="Pink.TButton", command=self.signin_button, width=25)
-    train_btn = ttk.Button(button_frame, text="Train", style="Pink.TButton", width=25)
+    # train_btn = ttk.Button(button_frame, text="Download", style="Pink.TButton", width=25)
+    # train_btn = ttk.Button(button_frame, text="Download", style="Pink.TButton", width=25)
 
     hello_label.grid(row=0, column=0, sticky="n",pady=(40,40))
     welcome_label.grid(row=1, column=0, sticky="n")
@@ -546,7 +533,7 @@ def show_hello_message(self):
     upload_btn.grid(row=0, column=1, sticky="n", pady=40)
     # login_btn.grid(row=0, column=2, sticky="n",padx=(0,400), pady=40)
     login_btn.grid(row=0, column=2, sticky="n",padx=(0,200), pady=40)
-    train_btn.grid(row=0, column=3, sticky="n", pady=40, padx=(0,100))
+    # train_btn.grid(row=0, column=3, sticky="n", pady=40, padx=(0,100))
 
     
 
