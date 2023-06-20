@@ -512,6 +512,7 @@ def place_center(w1, width, height):  # Placing the window in the center of the 
 
 def show_hello_message(self):
     from GUI.Styles import PinkPallete as P
+    self.main_frame.message_label_middle.config(text="Model is training, this may take a while...")
     text_frame = tk.Frame(self.main_frame.center_frame, bg=str(P.get(1)))
     button_frame = tk.Frame(self.main_frame.center_frame, bg=str(P.get(1)))
 
@@ -536,13 +537,16 @@ def show_hello_message(self):
     upload_btn = ttk.Button(button_frame, text="Upload Bubble diagram", style="Pink.TButton", width=25, 
                             command=lambda: self.open_file(extension='*.*', dest_port=''))
     login_btn = ttk.Button(button_frame, text="Login", style="Pink.TButton", command=self.signin_button, width=25)
+    train_btn = ttk.Button(button_frame, text="Train", style="Pink.TButton", width=25)
 
     hello_label.grid(row=0, column=0, sticky="n",pady=(40,40))
     welcome_label.grid(row=1, column=0, sticky="n")
 
     play_btn.grid(row=0, column=0, sticky="n", padx=(400,0), pady=40)
     upload_btn.grid(row=0, column=1, sticky="n", pady=40)
-    login_btn.grid(row=0, column=2, sticky="n",padx=(0,400), pady=40)
+    # login_btn.grid(row=0, column=2, sticky="n",padx=(0,400), pady=40)
+    login_btn.grid(row=0, column=2, sticky="n",padx=(0,200), pady=40)
+    train_btn.grid(row=0, column=3, sticky="n", pady=40, padx=(0,100))
 
     
 
