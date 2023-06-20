@@ -229,6 +229,8 @@ class StartGUI(ttk.Frame):
             self.create_settings_tab()  # tab[1]
         self.notebook_settings.grid(row=0, column=0, sticky="nswe")
 
+    def play_with_bubble_diagram_btn(self):
+        from GUI.PythonCode import GRAPH
     def signin_button(self):
         self.selected.set(-1)
         # self.main_frame.center_frame.grid_remove()
@@ -408,6 +410,8 @@ class StartGUI(ttk.Frame):
         self.port_entry.grid(row=0, column=1)
         self.port_entry.insert(0, self.ab.dest_port)
 
+        
+
 
 def place_center(w1, width, height):  # Placing the window in the center of the screen
     reso = pg.size()
@@ -418,6 +422,8 @@ def place_center(w1, width, height):  # Placing the window in the center of the 
     width_str = str(width)
     height_str = str(height)
     w1.geometry(width_str + "x" + height_str + "+" + str(x) + "+" + str(y))
+
+
 
 def show_hello_message(self):
     from GUI.Styles import PinkPallete as P
@@ -441,7 +447,7 @@ def show_hello_message(self):
 
     hello_label = ttk.Label(text_frame, text="Hello =)", style="Hello.TLabel", anchor="n")
     welcome_label = ttk.Label(text_frame, text="Welcome to automatic floorplan generator!\n \tWould you like to do?", style="Welcome.TLabel", anchor="n")
-    play_btn = ttk.Button(button_frame, text="Play with Bubble diagram", style="Pink.TButton", width=25)
+    play_btn = ttk.Button(button_frame, text="Play with Bubble diagram", style="Pink.TButton", width=25, command=self.play_with_bubble_diagram_btn)
     upload_btn = ttk.Button(button_frame, text="Upload Bubble diagram", style="Pink.TButton", width=25)
     login_btn = ttk.Button(button_frame, text="Login", style="Pink.TButton", command=self.signin_button, width=25)
 
@@ -452,5 +458,5 @@ def show_hello_message(self):
     upload_btn.grid(row=0, column=1, sticky="n", pady=40)
     login_btn.grid(row=0, column=2, sticky="n",padx=(0,400), pady=40)
 
+    
 
-    messagebox.showinfo("Hello =)", "Welcome to automatic floorplan generator!\n Would you like to")
