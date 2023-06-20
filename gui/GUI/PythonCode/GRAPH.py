@@ -16,9 +16,10 @@ BLACK = (0,0,0)
 YELLOW = (255,255,0)
 PINKTEXT = PinkPallete.get(4)
 
-screen = pygame.display.set_mode((800,400))
-# pygame.display.set_mode.icon = pygame.image.load('house_icon-removebg-preview.ico')
-# pygame.display.set_icon('house_icon-removebg-preview.ico')
+WIDTH = 800
+HEIGHT = 600
+
+screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_icon(pygame.image.load("house_icon.png"))
 
 #set the icon of this windows
@@ -41,6 +42,8 @@ msg_font = pygame.font.Font('roboto.ttf', 20)
 add_node = button_font.render('Add Nodes', True, WHITE)
 add_edge = button_font.render('Add Edges', True, WHITE)
 clear_button = button_font.render('Clear Screen', True, WHITE) 
+generate_button = button_font.render('Generate', True, WHITE)
+
 msg_box = msg_font.render('', True, PINKTEXT);
 
 node_button = plus
@@ -250,7 +253,8 @@ def show_edges():
 
 def show_buttons():
     if(state == 'start'):
-        pass
+        screen.blit(clear_button,(7+algo_button.get_width()/2-53,550+algo_button.get_height()/2-500))
+        screen.blit(generate_button,(7+generate_button.get_width()/2-53+500,550+generate_button.get_height()/2-450))
         
 def show_msg():
     msg_box = msg_font.render(msg, True, PINKTEXT);
@@ -278,35 +282,11 @@ while running:
             screen.blit(add_node,(60,12))
         if(ishovering(5,42,5+edge_button.get_width(),42+edge_button.get_height())):
             screen.blit(add_edge,(60,48))
-            
-    if state == 'dfs':
-        temp_node = [color[0] for i in range(len(node_color))]
-        make_equal(temp_node,node_color)
-        start_dfs(point)
-        make_equal(node_color,temp_node)
-        yellow_edges.clear()
-        state = 'start'  
-        point = -1
-        
-    if state == 'bfs':
-        temp_node = [color[0] for i in range(len(node_color))]
-        make_equal(temp_node,node_color)
-        start_bfs(point)
-        make_equal(node_color,temp_node)
-        yellow_edges.clear()
-        state = 'start'  
-        point = -1
-    
-    if state == 'find_bridges':
-        temp_node = [color[0] for i in range(len(node_color))]
-        make_equal(temp_node,node_color)
-        start_finding_bridges()
-        state = 'exit'
         
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            break;
+            break
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             if(pos[0]!=-1 & pos[1]!=-1):
@@ -326,17 +306,17 @@ while running:
                         state = 'add_edge1'
                         node_button = cross
                         edge_button = cross
-                    elif(isClicked(7,446,7+algo_button.get_width(),446+algo_button.get_height(),pos[0],pos[1])):
-                        if len(nodes) != 0:
-                            state = 'choose start point for bfs'
-                            msg = 'Choose source for the Breadth First Search.'
-                        else: state = 'start'
-                    elif(isClicked(7,394,7+algo_button.get_width(),394+algo_button.get_height(),pos[0],pos[1])):
-                        if len(nodes) != 0:
-                            node_button = cross
-                            state = 'find_bridges'
-                            msg = 'Articution Points: Yellow nodes    Bridges: Blue edges'
-                        else: state = 'start'
+                    # elif(isClicked(7,446,7+algo_button.get_width(),446+algo_button.get_height(),pos[0],pos[1])):
+                    #     if len(nodes) != 0:
+                    #         state = 'choose start point for bfs'
+                    #         msg = 'Choose source for the Breadth First Search.'
+                    #     else: state = 'start'
+                    # elif(isClicked(7,394,7+algo_button.get_width(),394+algo_button.get_height(),pos[0],pos[1])):
+                    #     if len(nodes) != 0:
+                    #         node_button = cross
+                    #         state = 'find_bridges'
+                    #         msg = 'Articution Points: Yellow nodes    Bridges: Blue edges'
+                    #     else: state = 'start'
                     elif(isClicked(7,550,7+algo_button.get_width(),550+algo_button.get_height(),pos[0],pos[1])):
                         nodes.clear()
                         node_color.clear()
