@@ -231,6 +231,7 @@ class StartGUI(ttk.Frame):
 
     def signin_button(self):
         self.selected.set(-1)
+        # self.main_frame.center_frame.grid_remove()
 
         # create pop up window of sign in
         self.signin_window = tk.Toplevel(self.main_window)
@@ -266,7 +267,7 @@ class StartGUI(ttk.Frame):
         self.password_entry.grid(row=2, column=1, sticky="e", padx=(0,20), pady=(0,20))  # Align to right
 
         # create a button for the sign in
-        self.login_btn = ttk.Button(self.signin_frame, style="Blue.TButton", text="Login", command=self.login)
+        self.login_btn = ttk.Button(self.signin_frame, style="Pink.TButton", text="Login", command=self.login)
         self.login_btn.grid(row=3, column=0, columnspan=2, padx=(20,20), pady=(0,20))  # Let it span 2 columns and align to right
         
     def login(self):
@@ -440,9 +441,9 @@ def show_hello_message(self):
 
     hello_label = ttk.Label(text_frame, text="Hello =)", style="Hello.TLabel", anchor="n")
     welcome_label = ttk.Label(text_frame, text="Welcome to automatic floorplan generator!\n \tWould you like to do?", style="Welcome.TLabel", anchor="n")
-    play_btn = ttk.Button(button_frame, text="Play with Bubble diagram", style="Pink.TButton")
-    upload_btn = ttk.Button(button_frame, text="Upload Bubble diagram", style="Pink.TButton")
-    login_btn = ttk.Button(button_frame, text="Login", style="Pink.TButton", command=lambda: self.login())
+    play_btn = ttk.Button(button_frame, text="Play with Bubble diagram", style="Pink.TButton", width=25)
+    upload_btn = ttk.Button(button_frame, text="Upload Bubble diagram", style="Pink.TButton", width=25)
+    login_btn = ttk.Button(button_frame, text="Login", style="Pink.TButton", command=self.signin_button, width=25)
 
     hello_label.grid(row=0, column=0, sticky="n",pady=(40,40))
     welcome_label.grid(row=1, column=0, sticky="n")
