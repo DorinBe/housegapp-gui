@@ -189,7 +189,7 @@ class StartGUI(ttk.Frame):
 
                 self.notebook_plots.tabs.append(frame)
 
-                if i is 0:
+                if i == 0:
                     self.notebook_plots.add(frame, text="All")    
                 else:
                     self.notebook_plots.add(frame, text="Room " + str(i))

@@ -10,8 +10,8 @@ class AppBoot:
         self.dest_port = ""
         self.config = ConfigParser.get_config()
         self.config.read(Paths.ini)
-        self.read_settings()
-        self.read_plots()
+        # self.read_settings()
+        # self.read_plots()
 
     def read_settings(self):
         """read 'destination ip' and 'destination port' from ini and save in global variables
