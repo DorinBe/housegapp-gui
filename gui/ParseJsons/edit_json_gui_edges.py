@@ -16,6 +16,29 @@ rooms = {}
 
 edge_selection = True
 room_selection = False
+
+def new_draw_edges(data, canvas):
+    global edge_map
+
+    for room in data["rooms"].items():
+        room_index = room[0]
+        edges = room[1]["edges"]
+        box = room[1]["boxes"]
+        room_type = room[1]["room_type"]
+
+        for edge in edges:
+            x1, y1, x2, y2, room_type, neighbour_room = edge
+            item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", f"{room_type}-{neighbour_room}"))
+            edge_map[item_id] = edge
+
+        if (room_type < 10):
+            x, y = edit_json.calculate_averge_of_box(box)
+            canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{room_index}")
+
+    canvas.bind("<Button-1>", partial(start_drag, canvas=canvas))
+    canvas.bind("<B1-Motion>", partial(drag, canvas=canvas))
+    canvas.bind("<ButtonRelease-1>", partial(end_drag, canvas=canvas))
+
     
 def draw_edges(data, canvas):
     global edge_map
