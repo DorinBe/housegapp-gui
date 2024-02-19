@@ -3,6 +3,7 @@ from tkinter import ttk
 import json
 from functools import partial
 import traceback
+from ParseJsons import edit_json
 
 # ANSI escape codes
 RED = '\033[31m'  # Red text
@@ -15,12 +16,21 @@ rooms = {}
 
 edge_selection = True
 room_selection = False
-
-def draw_edges(edges, canvas):
+    
+def draw_edges(data, canvas):
     global edge_map
-    for edge in edges:
-        x1, y1, x2, y2, room_index, neighbour_room = edge
-        item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", f"{room_index}-{neighbour_room}"))
+    edges = data["edges"]
+    prev_room_index = -1
+    for edge_index, edge in enumerate(edges):
+        x1, y1, x2, y2, room_type, neighbour_room = edge
+        room_index = data["ed_rm"][edge_index][0]
+        if (edit_json.can_draw_label(prev_room_index, room_index) == True):
+            prev_room_index = room_index
+            found_box = edit_json.find_edge_in_boxes(edge, data["boxes"])
+            x, y = edit_json.calculate_averge_of_box(found_box)
+            canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{room_index}")
+
+        item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", f"{room_type}-{neighbour_room}"))
         edge_map[item_id] = edge
     # Bind mouse events for edge editing
     canvas.bind("<Button-1>", partial(start_drag, canvas=canvas))

@@ -130,12 +130,12 @@ class StartGUI(ttk.Frame):
             
             self.canvas = tk.Canvas(self.main_frame.right_frame, width=MAX_X, height=MAX_Y, bg='white')
             self.canvas.grid(row=0, column=0, sticky="nswe")
-            edit_json_gui.draw_edges(edges, self.canvas)
+            edit_json_gui.draw_edges(data, self.canvas)
             self.save_new_json = ttk.Button(self.main_frame.right_frame, text="Save new Json", command=lambda: edit_json_gui.on_close(data, file_path_name, self.main_frame.message_label_middle))
             self.save_new_json.grid(row=0, column=1, sticky="w")
-            self.edge_selection = ttk.Button(self.main_frame.right_frame, text="Edge selection", command=lambda: edit_json.edge_selection)
+            self.edge_selection = ttk.Button(self.main_frame.right_frame, text="Edge selection", command=lambda: edit_json_gui.edge_selection())
             self.edge_selection.grid(row=1, column=1, sticky="w")
-            self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json.room_selection)
+            self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui.room_selection())
             self.room_selection.grid(row=2, column=1, sticky="w")
 
         # elif extensions of images
