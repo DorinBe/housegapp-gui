@@ -13,11 +13,14 @@ DEBUG = True
 edge_map={}
 rooms = {}
 
+edge_selection = True
+room_selection = False
+
 def draw_edges(edges, canvas):
     global edge_map
     for edge in edges:
-        x1, y1, x2, y2, room_type, neighbour_room = edge
-        item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", f"{room_type}-{neighbour_room}"))
+        x1, y1, x2, y2, room_index, neighbour_room = edge
+        item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", f"{room_index}-{neighbour_room}"))
         edge_map[item_id] = edge
     # Bind mouse events for edge editing
     canvas.bind("<Button-1>", partial(start_drag, canvas=canvas))
