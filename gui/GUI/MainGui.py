@@ -22,6 +22,9 @@ from Logic import AppBoot, PcapLogic
 import ctypes
 import threading
 
+import json
+from ParseJsons import edit_json_gui
+
 MAX_X, MAX_Y = 1400, 800
 
 # tabs globals
@@ -60,6 +63,8 @@ class StartGUI(ttk.Frame):
         # set functionalities to buttons
         self.main_frame.load_bubble_diagram_btn.configure(
             command=lambda: self.open_file(extension='*.*', dest_port=''))
+        self.main_frame.load_json_btn.configure(
+            command=lambda: self.open_file(extension='json', dest_port=''))
         self.main_frame.stop_analyzing_btn.configure(command=self.stop_threads)
         self.main_frame.plots_radio.configure(value=1, variable=self.selected, command=self.show_selected_size,
                                               state='disabled')
@@ -108,19 +113,26 @@ class StartGUI(ttk.Frame):
         if not self.path:
             print(f"Error opening file {self.path}")
             return
+        file_path_name = self.path.split('.')[0]
         extension = self.path.split('.')[1]
 
         # clear graphs and notebooks data
         self.notebook_plots = self.notebook_plots.destroy()
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
 
-        if extension == "pcapng" or extension == "pcap":
-            t = PcapLogic.AsyncPcap2Bin(self.path, dest_port, self.main_frame.message_label_middle)
-            FeedbackWidgets.AsyncPcap2Bin(self.main_frame.message_label_middle).start()
-
-            thread = Thread(target=check_pcap, args=(insert_to_gui_thread,))
-            thread.start()
-            t.start()
+        if extension == "json":
+            with open(self.path) as file:
+                data = json.load(file)
+                room_type = data["room_type"]
+                boxes = data["boxes"]
+                edges = data["edges"]
+                ed_rm = data["ed_rm"]
+            
+            self.canvas = tk.Canvas(self.main_frame.right_frame, width=MAX_X, height=MAX_Y, bg='white')
+            self.canvas.grid(row=0, column=0, sticky="nswe")
+            edit_json_gui.draw_edges(edges, self.canvas)
+            self.save_new_json = ttk.Button(self.main_frame.right_frame, text="Save new Json", command=lambda: edit_json_gui.on_close(data, file_path_name, self.main_frame.message_label_middle))
+            self.save_new_json.grid(row=1, column=1, sticky="w")
 
         # elif extensions of images
         elif extension == "png" or extension == "jpg" or extension == "jpeg":
@@ -259,7 +271,7 @@ class StartGUI(ttk.Frame):
             t.start()
 
         else:
-            messagebox.showerror(message="Please choode pcap files or bin files")
+            messagebox.showerror(message="Selected file is not supported.")
             return
 
     def show_selected_size(self):
@@ -295,10 +307,10 @@ class StartGUI(ttk.Frame):
         self.selected.set(-1)
         self.notebook_plots.grid_remove()
 
-        if self.notebook_settings.counter == 0:
-            self.create_sites_tab()  # tab[0]
-            self.create_settings_tab()  # tab[1]
-        self.notebook_settings.grid(row=0, column=0, sticky="nswe")
+        # if self.notebook_settings.counter == 0:
+            # self.create_sites_tab()  # tab[0]
+            # self.create_settings_tab()  # tab[1]
+        # self.notebook_settings.grid(row=0, column=0, sticky="nswe")
 
     def play_with_bubble_diagram_btn(self):
         from GUI.PythonCode import GRAPH
@@ -508,30 +520,27 @@ def show_hello_message(self):
     text_frame.grid_rowconfigure(0, weight=1)
     text_frame.grid_rowconfigure(1, weight=1)
     button_frame.grid_columnconfigure(0, weight=1)
-    # button_frame.grid_columnconfigure(1, weight=1)
     button_frame.grid_columnconfigure(2, weight=1)
     button_frame.grid_rowconfigure(0, weight=1)
 
 
     self.main_frame.center_frame.grid_columnconfigure(0, weight=1)
-    # self.main_frame.center_frame.grid_rowconfigure(0, weight=2)
-    # self.main_frame.center_frame.grid_rowconfigure(1, weight=1)
 
     hello_label = ttk.Label(text_frame, text="Hello =)", style="Hello.TLabel", anchor="n")
     welcome_label = ttk.Label(text_frame, text="Welcome to automatic floorplan generator!\n \tWould you like to do?", style="Welcome.TLabel", anchor="n")
     play_btn = ttk.Button(button_frame, text="Play with Bubble diagram", style="Pink.TButton", width=25, command=self.play_with_bubble_diagram_btn)
     upload_btn = ttk.Button(button_frame, text="Upload Bubble diagram", style="Pink.TButton", width=25, 
                             command=lambda: self.open_file(extension='*.*', dest_port=''))
+    json_btn = ttk.Button(button_frame, text="Upload JSON", style="Pink.TButton", width=25,
+                            command=lambda: self.open_file(extension='*.json', dest_port=''))
     login_btn = ttk.Button(button_frame, text="Login", style="Pink.TButton", command=self.signin_button, width=25)
-    # train_btn = ttk.Button(button_frame, text="Download", style="Pink.TButton", width=25)
-    # train_btn = ttk.Button(button_frame, text="Download", style="Pink.TButton", width=25)
 
     hello_label.grid(row=0, column=0, sticky="n",pady=(40,40))
     welcome_label.grid(row=1, column=0, sticky="n")
 
     play_btn.grid(row=0, column=0, sticky="n", padx=(400,0), pady=40)
     upload_btn.grid(row=0, column=1, sticky="n", pady=40)
-    # login_btn.grid(row=0, column=2, sticky="n",padx=(0,400), pady=40)
+    json_btn.grid(row=1, column=1, sticky="n", pady=40)
     login_btn.grid(row=0, column=2, sticky="n",padx=(0,200), pady=40)
     # train_btn.grid(row=0, column=3, sticky="n", pady=40, padx=(0,100))
 

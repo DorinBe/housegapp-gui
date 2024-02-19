@@ -31,6 +31,7 @@ class CreateMainFrame(ttk.Frame):
 
         # buttons
         self.load_bubble_diagram_btn = ttk.Button(master=self.left_frame, text="Load  Bubble Diagram", width=20, style='Pink.TButton')
+        self.load_json_btn = ttk.Button(master=self.left_frame, text="Load JSON", width=20, style='Pink.TButton')
         self.stop_analyzing_btn = ttk.Button(master=self.left_frame,width=3, style='Stop.TButton')
         self.plots_radio = ttk.Radiobutton(self.left_frame, text='Rooms\t', width=10, style='Pink.TRadiobutton')
         self.download_btn = ttk.Button(self.left_frame, text='Download', width=10, style="Pink.TButton")
@@ -101,9 +102,10 @@ class CreateMainFrame(ttk.Frame):
         self.message_label_right.grid(row=0, column=2, sticky='ew')
 
         self.load_bubble_diagram_btn.grid(row=0, column=0, padx=5, pady=5)
+        self.load_json_btn.grid(row=1, column=0, padx=5, pady=5)
         self.stop_analyzing_btn.grid(row=0, column=1, padx=(0, 5))
-        self.plots_radio.grid(row=1, column=0, padx=5, pady=5)
-        self.download_btn.grid(row=3, column=0, padx=5, pady=5)
-        self.settings_btn.grid(row=4, column=0, padx=5, pady=5)
-        self.signin_btn.grid(row=5, column=0, padx=5, pady=5)
-        self.info_btn.grid(row=7, column=0, padx=5, pady=5)
+        self.plots_radio.grid(row=2, column=0, padx=5, pady=5)
+        self.download_btn.grid(row=4, column=0, padx=5, pady=5)
+        # self.settings_btn.grid(row=5, column=0, padx=5, pady=5)
+        self.signin_btn.grid(row=6, column=0, padx=5, pady=5)
+        # self.info_btn.grid(row=8, column=0, padx=5, pady=5)

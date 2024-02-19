@@ -6,7 +6,7 @@ Created on Fri Jul 17 11:38:45 2020
 """
 import pygame
 import queue
-from GUI.Styles import PinkPallete
+from Styles import PinkPallete
 
 clock = pygame.time.Clock()
 pygame.init()
@@ -259,6 +259,27 @@ def show_buttons():
 def show_msg():
     msg_box = msg_font.render(msg, True, PINKTEXT);
     screen.blit(msg_box,(215,570))
+
+def draw_grid():
+    grid_color = (200, 200, 200)  # Light grey for grid lines
+    text_color = (100, 100, 100)  # Dark grey for text
+    grid_step = (int)(WIDTH//256)  # Distance between grid lines
+
+    # Use an existing font or create a new one for the numbers
+    number_font = pygame.font.SysFont('Arial', 18)  # You can replace 'Arial' with any available font
+
+    # Draw vertical lines and numbers
+    for x in range(0, WIDTH, grid_step):
+        pygame.draw.line(screen, grid_color, (x, 0), (x, HEIGHT))
+        number_surface = number_font.render(str(x), True, text_color)  # Render the number as a surface
+        screen.blit(number_surface, (x, 0))  # Position the number at the start of the line
+
+    # Draw horizontal lines and numbers
+    for y in range(0, HEIGHT, grid_step):
+        pygame.draw.line(screen, grid_color, (0, y), (WIDTH, y))
+        number_surface = number_font.render(str(y), True, text_color)  # Render the number as a surface
+        screen.blit(number_surface, (0, y))  # Position the number at the start of the line
+
     
 running = True
 
@@ -274,6 +295,7 @@ while running:
         
     show_buttons()
     show_msg()
+    draw_grid()
     
     if state == 'start':
         node_button = plus
