@@ -16,14 +16,49 @@ room_map = {}
 
 edge_selection = True
 room_selection = False
+units = 1  # pixels
+
+root=0
+
 
 # ***** Room Events *****
 
-def draw_boxes(data, canvas):
-    global rooms, edge_selection, room_selection
+def move_up(event, canvas):
+    global current_rectangle
+    canvas.move(current_rectangle, 0, -units)  # Move up by 'units' units
+    canvas.move(f"label-room-{current_rectangle}", 0, -units)
+
+def move_down(event, canvas):
+    global current_rectangle
+    canvas.move(current_rectangle, 0, units)  # Move down by 10 units
+    canvas.move(f"label-room-{current_rectangle}", 0, units)
+
+def move_left(event, canvas):
+    global current_rectangle
+    canvas.move(current_rectangle, -units, 0)  # Move left by 10 units
+    canvas.move(f"label-room-{current_rectangle}", -units, 0)
+
+def move_right(event, canvas):
+    global current_rectangle
+    canvas.move(current_rectangle, units, 0)  # Move right by 10 units
+    canvas.move(f"label-room-{current_rectangle}", units, 0)
+
+def move_up(event, canvas):
+    global current_rectangle
+    canvas.move(current_rectangle, 0, -units)  # Move up by 10 units
+    canvas.move(f"label-room-{current_rectangle}", 0, -units)
+
+def on_canvas_click(event):
+    print("Canvas clicked at", event.x, event.y)
+    event.widget.focus_set()  # Set focus to the canvas when it's clicked
+
+def draw_boxes(data, canvas, _root):
+    global rooms, edge_selection, room_selection, root
+    root = _root
     edge_selection = False
     room_selection = True
     canvas.delete("edge")
+    canvas.delete("box")
     for room in data["rooms"].items():
         room_index = room[0]
         room_type = room[1]["room_type"]
@@ -32,18 +67,25 @@ def draw_boxes(data, canvas):
         item_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", tags=("box", f"{room_type}-{room_index}"))
         room_map[item_id] = item_id
         x, y = edit_json.calculate_averge_of_box(box)
-        canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{room_index}")
-
+        canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{item_id}")
+    
+    canvas.bind("<1>", on_canvas_click)
     canvas.bind("<Button-1>", partial(on_mouse_down, canvas=canvas))
     canvas.bind("<B1-Motion>", partial(on_mouse_move, canvas=canvas))
     canvas.bind("<ButtonRelease-1>", partial(on_mouse_up, canvas=canvas))
+    root.bind("<Up>", partial(move_up, canvas=canvas))
+    root.bind("<Down>", partial(move_down, canvas=canvas))
+    root.bind("<Left>", partial(move_left, canvas=canvas))
+    root.bind("<Right>", partial(move_right, canvas=canvas))
 
 def on_mouse_down(event, canvas):
     global current_rectangle, action_type, start_x, start_y, resize_edge
+    canvas.itemconfig(current_rectangle, outline="black")
     item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
     if "box" in tags:
         current_rectangle = item
+        print(f"Selected box: {current_rectangle}")
         start_x, start_y = event.x, event.y
         x1, y1, x2, y2 = canvas.coords(current_rectangle)
         edge_margin = 5  # pixels
@@ -65,6 +107,9 @@ def on_mouse_down(event, canvas):
             resize_edge = None
 
         action_type = "resize" if resize_edge else "move"
+        canvas.itemconfig(current_rectangle, outline="green")
+        canvas.focus_set()
+
 
 def on_mouse_move(event, canvas):
     global current_rectangle, action_type, start_x, start_y, drag_mode, resize_edge
@@ -105,7 +150,7 @@ def on_mouse_move(event, canvas):
 
 def on_mouse_up(event, canvas):
     global current_rectangle, action_type
-    current_rectangle = None
+    # current_rectangle = None
     action_type = None
 
 # ***** Room Events *****
@@ -117,6 +162,7 @@ def draw_edges(data, canvas):
     edge_selection = True
     room_selection = False
     canvas.delete("box")
+    canvas.delete("edge")
 
     for room in data["rooms"].items():
         room_index = room[0]

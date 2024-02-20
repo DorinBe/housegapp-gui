@@ -35,7 +35,7 @@ admin_flag = False
 class StartGUI(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.window = parent
+        self.window = self.root = parent
         MyStyle()
         self.window.title(f"House-GAN++")  # title of the GUI window
         self.window.iconbitmap("house_icon-removebg-preview.ico")
@@ -130,7 +130,7 @@ class StartGUI(ttk.Frame):
             # self.save_new_json.grid(row=0, column=1, sticky="w")
             self.edge_selection = ttk.Button(self.main_frame.right_frame, text="Edge selection", command=lambda: edit_json_gui.draw_edges(reorganized_json, self.canvas))
             self.edge_selection.grid(row=1, column=1, sticky="w")
-            self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui.draw_boxes(reorganized_json, self.canvas))
+            self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui.draw_boxes(reorganized_json, self.canvas, self.root))
             self.room_selection.grid(row=2, column=1, sticky="w")
 
         # elif extensions of images
