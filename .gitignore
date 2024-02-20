@@ -169,3 +169,4 @@ Logic/__pycache__/
 dataset.rar
 dataset/
 gui/GUI/PythonCode/__pycache__/Styles.cpython-310.pyc
+gui/ParseJsons/__pycache__/edit_json_gui.cpython-310.pyc

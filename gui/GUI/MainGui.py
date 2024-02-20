@@ -23,7 +23,7 @@ import ctypes
 import threading
 
 import json
-from ParseJsons import edit_json, edit_json_gui_edges
+from ParseNewJson import edit_json, edit_json_gui
 
 MAX_X, MAX_Y = 1400, 800
 
@@ -123,22 +123,14 @@ class StartGUI(ttk.Frame):
         if extension == "json":
             with open(self.path) as file:
                 data = json.load(file)
-            room_type = data["room_type"]
-            boxes = data["boxes"]
-            edges = data["edges"]
-            ed_rm = data["ed_rm"]
-
-            new_json = edit_json.reorganize_json(data)
-            
+            reorganized_json = edit_json.reorganize_json(data)
             self.canvas = tk.Canvas(self.main_frame.right_frame, width=MAX_X, height=MAX_Y, bg='white')
             self.canvas.grid(row=0, column=0, sticky="nswe")
-            # edit_json_gui_edges.draw_edges(data, self.canvas)
-            edit_json_gui_edges.new_draw_edges(new_json, self.canvas)
-            self.save_new_json = ttk.Button(self.main_frame.right_frame, text="Save new Json", command=lambda: edit_json_gui_edges.on_close(data, file_path_name, self.main_frame.message_label_middle))
-            self.save_new_json.grid(row=0, column=1, sticky="w")
-            self.edge_selection = ttk.Button(self.main_frame.right_frame, text="Edge selection", command=lambda: edit_json_gui_edges.edge_selection())
+            # self.save_new_json = ttk.Button(self.main_frame.right_frame, text="Save new Json", command=lambda: edit_json_gui_edges.on_close(data, file_path_name, self.main_frame.message_label_middle))
+            # self.save_new_json.grid(row=0, column=1, sticky="w")
+            self.edge_selection = ttk.Button(self.main_frame.right_frame, text="Edge selection", command=lambda: edit_json_gui.draw_edges(reorganized_json, self.canvas))
             self.edge_selection.grid(row=1, column=1, sticky="w")
-            self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui_edges.room_selection())
+            self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui.draw_boxes(reorganized_json, self.canvas))
             self.room_selection.grid(row=2, column=1, sticky="w")
 
         # elif extensions of images
