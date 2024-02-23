@@ -1,9 +1,7 @@
-import tkinter as tk
-from tkinter import ttk
-import json
 from functools import partial
-import traceback
 from ParseNewJson import edit_json
+import json
+import traceback
 
 # ANSI escape codes
 RED = '\033[31m'  # Red text
@@ -14,14 +12,14 @@ DEBUG = True
 edge_map={}
 room_map = {}
 
-edge_selection = True
+edge_selection = False
 room_selection = False
 units = 1  # pixels
 
+start_x = start_y = current_edge = current_rectangle = None
+drag_mode = None  # 'first', 'second', or None
+
 root=0
-
-
-# ***** Room Events *****
 
 def move_up(event, canvas):
     global current_rectangle
@@ -57,15 +55,17 @@ def draw_boxes(data, canvas, _root):
     root = _root
     edge_selection = False
     room_selection = True
-    canvas.delete("edge")
+    # canvas.delete("edge")
+    canvas.itemconfigure("edge", width=0.5, fill="gray")
     canvas.delete("box")
+
     for room in data["rooms"].items():
         room_index = room[0]
         room_type = room[1]["room_type"]
         box = room[1]["boxes"]
         x1, y1, x2, y2 = box
         item_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", tags=("box", f"{room_type}-{room_index}"))
-        room_map[item_id] = item_id
+        room_map[item_id] = box
         x, y = edit_json.calculate_averge_of_box(box)
         canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{item_id}")
     
@@ -80,7 +80,6 @@ def draw_boxes(data, canvas, _root):
 
 def on_mouse_down(event, canvas):
     global current_rectangle, action_type, start_x, start_y, resize_edge
-    canvas.itemconfig(current_rectangle, outline="black")
     item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
     if "box" in tags:
@@ -109,7 +108,6 @@ def on_mouse_down(event, canvas):
         action_type = "resize" if resize_edge else "move"
         canvas.itemconfig(current_rectangle, outline="green")
         canvas.focus_set()
-
 
 def on_mouse_move(event, canvas):
     global current_rectangle, action_type, start_x, start_y, drag_mode, resize_edge
@@ -150,19 +148,23 @@ def on_mouse_move(event, canvas):
 
 def on_mouse_up(event, canvas):
     global current_rectangle, action_type
-    # current_rectangle = None
+    canvas.itemconfig(current_rectangle, outline="black")
+    current_rectangle = None
     action_type = None
 
-# ***** Room Events *****
-        
-# ***** Edges Events *****
+    if current_rectangle:
+        new_coords = canvas.coords(current_rectangle)
+        if current_rectangle in room_map:
+            room_map[current_rectangle] = new_coords
 
-def draw_edges(data, canvas):
+        current_rectangle = None
+
+def draw_edges(data, canvas, _root):
     global edge_map, edge_selection, room_selection
     edge_selection = True
     room_selection = False
-    canvas.delete("box")
     canvas.delete("edge")
+    canvas.itemconfigure("box", width=0.5, outline="gray")
 
     for room in data["rooms"].items():
         room_index = room[0]
@@ -171,13 +173,16 @@ def draw_edges(data, canvas):
         room_type = room[1]["room_type"]
 
         for edge in edges:
-            x1, y1, x2, y2, room_type, neighbour_room = edge
-            item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", f"{room_type}-{neighbour_room}"))
-            edge_map[item_id] = edge
+            try:
+                x1, y1, x2, y2, room_type, neighbour_room = edge
+                item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", f"{room_type}-{neighbour_room}"))
+                edge_map[item_id] = edge
 
-        if (room_type < 10):
-            x, y = edit_json.calculate_averge_of_box(box)
-            canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{room_index}")
+                if (room_type < 10):
+                    x, y = edit_json.calculate_averge_of_box(box)
+                    canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{room_index}")
+            except Exception as e:
+                traceback.format_exc(e)
 
     canvas.bind("<Button-1>", partial(start_drag, canvas=canvas))
     canvas.bind("<B1-Motion>", partial(drag, canvas=canvas))
@@ -190,6 +195,7 @@ def start_drag(event, canvas):
     if "edge" in tags:
         start_x, start_y = event.x, event.y
         current_edge = item
+        canvas.itemconfig(current_edge, fill="green", width=2)
         line_coords = canvas.coords(current_edge)
         # Determine if the click is near an endpoint
         drag_mode = is_close_to_endpoint(start_x, start_y, line_coords)
@@ -212,6 +218,7 @@ def drag(event, canvas):
 def end_drag(event, canvas):
     global current_edge, drag_mode
     if current_edge:
+        canvas.itemconfig(current_edge, fill="black", width=2)
         new_coords = canvas.coords(current_edge)
         if current_edge in edge_map:
             edge_map[current_edge][:4] = new_coords
@@ -219,8 +226,31 @@ def end_drag(event, canvas):
         current_edge = None
         drag_mode = None
 
-# ***** Edges Events *****
-        
+def dump_boxes(path, fixed_json):
+    from datetime import datetime
+    try:
+        path = path + '_' + str(datetime.now().strftime("%Y-%m-%d_%H-%M")) + '.json'
+        with open(path, 'a+') as file:
+            json.dump(fixed_json, file)
+    except Exception as e:
+        return traceback.format_exc(e)
+    return "File saved as " + path
+
+def output_newdata_to_original_format(data, canvas, _root):
+    new_data = {
+        "room_type": [],
+        "boxes": [],
+        "edges":[],
+        "ed_rm":[]
+    }
+
+    new_data["room_type"] = data["room_type"]
+    new_data["boxes"] = [value for value in room_map.values()]
+    new_data["edges"] = [value for value in edge_map.values()]
+    new_data["ed_rm"] = data["ed_rm"]
+
+    return new_data
+
 def is_close_to_endpoint(x, y, line_coords, threshold=10):
     x1, y1, x2, y2 = line_coords
     near_first_endpoint = (x - x1)**2 + (y - y1)**2 <= threshold**2
@@ -231,7 +261,38 @@ def is_close_to_endpoint(x, y, line_coords, threshold=10):
         return 'second'
     return None
 
-start_x = start_y = current_edge = current_rectangle = None
-drag_mode = None  # 'first', 'second', or None
+def validate_data(reorganized_json):
+    for room_index, items in reorganized_json["rooms"].items():
+        edges, ed_rm, boxes,room_type = items["edges"], items["ed_rm"], items["boxes"], items["room_type"]
+        for i, edge in enumerate(edges):
+            if not edit_json.is_edge_inside_box(edge, boxes):
+                print(f"Edge {edge} not found in any box")
+                fixed_edge = edit_json.fix_difference_between_edge_to_box(edge, boxes)
+                reorganized_json['rooms'][room_index]['edges'][i] = fixed_edge
+                fixed_edge=None
+    return reorganized_json
+
+def on_close(data, path, message_label_middle, canvas, root, reor_data):
+    # check all items on canvas 
+    if not edge_map:
+        draw_edges(reor_data, canvas, root)
+    if not room_map:
+        draw_boxes(reor_data, canvas, root)
+
+    # create a json, in the format of the original json
+    new_data = output_newdata_to_original_format(data, canvas, root)
+
+    # reorganize the json for simplification
+    reorganized_json = edit_json.reorganize_json(new_data)
+
+    # fix edges that are outside of boxes
+    fixed_json = validate_data(reorganized_json)
+
+    # convert new format to original format
+    original_format_json = edit_json.from_new_format_to_original_format(fixed_json)
+
+    new_path = dump_boxes(path, original_format_json)
+
+    message_label_middle.config(text=new_path)
 
 
