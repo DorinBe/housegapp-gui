@@ -62,6 +62,15 @@ def draw_boxes(data, canvas, _root):
         canvas.itemconfigure("box", width=2, outline="black")
         canvas.tag_raise("box")
         canvas.tag_raise("label")
+
+        canvas.bind("<1>", on_canvas_click)
+        canvas.bind("<Button-1>", partial(on_mouse_down, canvas=canvas))
+        canvas.bind("<B1-Motion>", partial(on_mouse_move, canvas=canvas))
+        canvas.bind("<ButtonRelease-1>", partial(on_mouse_up, canvas=canvas))
+        root.bind("<Up>", partial(move_up, canvas=canvas))
+        root.bind("<Down>", partial(move_down, canvas=canvas))
+        root.bind("<Left>", partial(move_left, canvas=canvas))
+        root.bind("<Right>", partial(move_right, canvas=canvas))
         return
 
     for room in data["rooms"].items():
@@ -173,6 +182,9 @@ def draw_edges(data, canvas, _root):
         canvas.itemconfigure("box", width=0.5, outline="gray")
         canvas.tag_raise("edge")
         canvas.tag_raise("label")
+        canvas.bind("<Button-1>", partial(start_drag, canvas=canvas))
+        canvas.bind("<B1-Motion>", partial(drag, canvas=canvas))
+        canvas.bind("<ButtonRelease-1>", partial(end_drag, canvas=canvas))
 
         return
 
@@ -308,4 +320,8 @@ def on_close(data, path, message_label_middle, canvas, root, reor_data):
 
 
 def on_clear(canvas) -> None:
+    global edge_map, room_map
+
     canvas.delete('all')
+    edge_map={}
+    room_map = {}
