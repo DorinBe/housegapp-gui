@@ -1,4 +1,5 @@
 from functools import partial
+import tkinter
 from ParseNewJson import edit_json
 import json
 import traceback
@@ -306,3 +307,5 @@ def on_close(data, path, message_label_middle, canvas, root, reor_data):
     message_label_middle.config(text=new_path)
 
 
+def on_clear(canvas) -> None:
+    canvas.delete('all')
