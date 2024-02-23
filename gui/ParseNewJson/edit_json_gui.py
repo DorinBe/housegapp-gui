@@ -51,13 +51,17 @@ def on_canvas_click(event):
     event.widget.focus_set()  # Set focus to the canvas when it's clicked
 
 def draw_boxes(data, canvas, _root):
-    global rooms, edge_selection, room_selection, root
+    global edge_selection, room_selection, root
     root = _root
     edge_selection = False
     room_selection = True
-    # canvas.delete("edge")
-    canvas.itemconfigure("edge", width=0.5, fill="gray")
-    canvas.delete("box")
+
+    if room_map != {}:
+        canvas.itemconfigure("edge", width=0.5, fill="gray")
+        canvas.itemconfigure("box", width=2, outline="black")
+        canvas.tag_raise("box")
+        canvas.tag_raise("label")
+        return
 
     for room in data["rooms"].items():
         room_index = room[0]
@@ -67,7 +71,7 @@ def draw_boxes(data, canvas, _root):
         item_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", tags=("box", f"{room_type}-{room_index}"))
         room_map[item_id] = box
         x, y = edit_json.calculate_averge_of_box(box)
-        canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{item_id}")
+        canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=(f"label-room-{item_id}", "label"))
     
     canvas.bind("<1>", on_canvas_click)
     canvas.bind("<Button-1>", partial(on_mouse_down, canvas=canvas))
@@ -147,9 +151,8 @@ def on_mouse_move(event, canvas):
     start_x, start_y = event.x, event.y
 
 def on_mouse_up(event, canvas):
-    global current_rectangle, action_type
+    global current_rectangle, action_type, room_map
     canvas.itemconfig(current_rectangle, outline="black")
-    current_rectangle = None
     action_type = None
 
     if current_rectangle:
@@ -160,11 +163,17 @@ def on_mouse_up(event, canvas):
         current_rectangle = None
 
 def draw_edges(data, canvas, _root):
-    global edge_map, edge_selection, room_selection
+    global edge_selection, room_selection
     edge_selection = True
     room_selection = False
-    canvas.delete("edge")
-    canvas.itemconfigure("box", width=0.5, outline="gray")
+    
+    if edge_map != {}:
+        canvas.itemconfigure("edge", width=2, fill="black")
+        canvas.itemconfigure("box", width=0.5, outline="gray")
+        canvas.tag_raise("edge")
+        canvas.tag_raise("label")
+
+        return
 
     for room in data["rooms"].items():
         room_index = room[0]
@@ -180,7 +189,7 @@ def draw_edges(data, canvas, _root):
 
                 if (room_type < 10):
                     x, y = edit_json.calculate_averge_of_box(box)
-                    canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=f"label-room-{room_index}")
+                    canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=(f"label-room-{room_index}", "label"))
             except Exception as e:
                 traceback.format_exc(e)
 
@@ -286,7 +295,8 @@ def on_close(data, path, message_label_middle, canvas, root, reor_data):
     reorganized_json = edit_json.reorganize_json(new_data)
 
     # fix edges that are outside of boxes
-    fixed_json = validate_data(reorganized_json)
+    # fixed_json = validate_data(reorganized_json)
+    fixed_json = reorganized_json
 
     # convert new format to original format
     original_format_json = edit_json.from_new_format_to_original_format(fixed_json)

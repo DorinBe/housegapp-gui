@@ -14,6 +14,8 @@ def fix_difference_between_edge_to_box(edge, box):
     replacedX = replacedY = False
     ex1, ey1, ex2, ey2 = edge[:4]
     bx1, by1, bx2, by2 = box
+    room_index = edge[4]
+    room_neighbour_index = edge[5]
 
     # replace edges
     if ex1>ex2:
@@ -50,7 +52,7 @@ def fix_difference_between_edge_to_box(edge, box):
         ey1 = ey2
         ey2 = temp
 
-    return ex1, ey1, ex2, ey2
+    return ex1, ey1, ex2, ey2,room_index, room_neighbour_index
 
 def find_edge_in_boxes(edge, boxes):
     for box in boxes:
