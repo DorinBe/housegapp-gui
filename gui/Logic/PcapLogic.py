@@ -4,9 +4,9 @@ from datetime import datetime
 from threading import Thread
 import time
 
-import pandas as pd
-import pyshark
-from pandas import DataFrame
+#import pandas as pd
+#import pyshark
+#from pandas import DataFrame
 
 # parsed_xml_df = DataFrame
 # deciphered_bin_df = DataFrame
