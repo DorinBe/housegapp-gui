@@ -1,3 +1,9 @@
+def add_is_inner_room(reorganized_json) -> dict:
+    for room in reorganized_json["rooms"].values():
+        room["is_inner_room"] = False
+    return reorganized_json
+
+
 def is_edge_inside_box(edge, box):
     """Check if an edge is inside a box"""
     box_x1, box_y1, box_x2, box_y2 = box
@@ -73,43 +79,58 @@ def can_draw_label(prev_room_index, room_index):
     return False
 
 def reorganize_json(data):
+    """Reorganize the original data format {"room_type"=[], "boxes"=[], ...} to a simpler format 
+    {
+        "room_types"=[],
+        "rooms"={"room_index:{"box":[],"edges":[],"ed_rm":[]},...}
+        "doors"={"door_index":{"box":[],"edges":[],"ed_rm":[]}...}
+    }
+    Returns the reorganized_data
+    """
+
     original_room_types = data["room_type"]
     original_boxes = data["boxes"]
     original_edges = data["edges"]
     original_ed_rm = data["ed_rm"]
 
-    new_json = {
-        "room_types": [],
-        "rooms": {
-        }
-    }
-    from_edge_index = 0
-    to_edge_index = 0
-    prev_room_index = 0
-    curr_room_index = 0
+    new_json = {"room_types": [],
+                "rooms": {},
+                "doors":{} }
+    from_edge_index, to_edge_index = 0,0
+    prev_room_index, curr_room_index = 0,0
     new_json["room_types"].extend(original_room_types)
     for to_edge_index, ed_rm in enumerate(original_ed_rm):
 
         curr_room_index = ed_rm[0]
         if (prev_room_index != curr_room_index):
+            room_or_door_string = original_room_types[prev_room_index]
+            room_or_door_string = "rooms" if room_or_door_string < 11 else "doors"
             new_room = {prev_room_index:{"edges": original_edges[from_edge_index:to_edge_index],
                                          "ed_rm": original_ed_rm[from_edge_index:to_edge_index],
                                          "boxes": original_boxes[prev_room_index],
                                          "room_type": original_room_types[prev_room_index]}}
             
-            new_json["rooms"].update(new_room)
+            new_json[f"{room_or_door_string}"].update(new_room)
             from_edge_index = to_edge_index
             prev_room_index = curr_room_index
+
+    room_or_door_string = original_room_types[prev_room_index]
+    room_or_door_string = "rooms" if room_or_door_string < 11 else "doors"
+    new_room = {prev_room_index:{"edges": original_edges[from_edge_index:to_edge_index+1],
+                                    "ed_rm": original_ed_rm[from_edge_index:to_edge_index+1],
+                                    "boxes": original_boxes[prev_room_index],
+                                    "room_type": original_room_types[prev_room_index]}}
+    
+    new_json[f"{room_or_door_string}"].update(new_room)
+    from_edge_index = to_edge_index
+    prev_room_index = curr_room_index
+    
     return new_json
 
+def deorganize_format(reorganized_json):
+    """ Input:  updated data in reogrganized format
+        Output: updated data in original format"""
 
-def collect_ed_rm(json_data):
-    ed_rm_list = []  # Initialize an empty list to hold the ed_rm values
-    for room_id, room_data in json_data.items():  # Iterate through each room in the JSON
-        ed_rm_list.extend(room_data.get('ed_rm', []))  # Use .get() to avoid KeyError and extend to flatten the list
-    return ed_rm_list
-
-def from_new_format_to_original_format(reorganized_json):
     original_json = {
         "room_type": [],
         "boxes": [],
@@ -118,23 +139,23 @@ def from_new_format_to_original_format(reorganized_json):
     }
 
     original_json["room_type"].extend(reorganized_json["room_types"])
-    original_json["ed_rm"].extend(collect_ed_rm(reorganized_json["rooms"]))
 
     for room in reorganized_json["rooms"].items():
         edges = room[1]["edges"]
         boxes = room[1]["boxes"]
+        ed_rm = room[1]["ed_rm"]
 
-        original_json["edges"].extend(edges)
         original_json["boxes"].append(boxes)
-    return original_json
+        original_json["edges"].extend(edges)
+        original_json["ed_rm"].extend(ed_rm)
+
+    for door in reorganized_json["doors"].items():
+        edges = room[1]["edges"]
+        boxes = room[1]["boxes"]
+        ed_rm = room[1]["ed_rm"]
+
+        original_json["boxes"].append(boxes)
+        original_json["edges"].extend(edges)
+        original_json["ed_rm"].extend(ed_rm)
         
-if (__name__ == "__main__"):
-    import json
-    with open("ParseJsons\\1736.json") as f:
-        data = json.load(f)
-        data = reorganize_json(data)
-        for room in data["rooms"].items():
-            for edge in room[1]["edges"]:
-                print(edge)
-            print(room)
-        print("debug newjson")
+    return original_json
