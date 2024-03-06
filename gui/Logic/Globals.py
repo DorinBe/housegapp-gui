@@ -1,1 +1,0 @@
-section2 = 'SITES'

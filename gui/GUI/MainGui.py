@@ -6,7 +6,6 @@ from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename
 from tkinter.scrolledtext import ScrolledText
 from tkinter.ttk import Entry
-from Logic.ConfigParser import ConfigParser
 from PIL import ImageTk
 from PIL import Image
 
@@ -14,10 +13,9 @@ import matplotlib.backends.backend_tkagg as tkagg
 import pyautogui as pg
 from matplotlib import pyplot as plt
 
-from GUI import AppWidgets, FeedbackWidgets, MainFrame
+from GUI import AppWidgets, MainFrame
 from GUI.AppWidgets import MyFrame
 from GUI.Styles import MyStyle
-from Logic import AppBoot, PcapLogic
 
 import ctypes
 import threading
@@ -61,14 +59,10 @@ class StartGUI(ttk.Frame):
 
     def initial_program(self):
         # set functionalities to buttons
-        self.main_frame.load_bubble_diagram_btn.configure(
-            command=lambda: self.open_file(extension='*.*', dest_port=''))
         self.main_frame.load_json_btn.configure(
-            command=lambda: self.open_file(extension='json', dest_port=''))
-        self.main_frame.stop_analyzing_btn.configure(command=self.stop_threads)
+            command=lambda: self.open_file(extension='json'))
         self.main_frame.plots_radio.configure(value=1, variable=self.selected, command=self.show_selected_size,
                                               state='disabled')
-        self.main_frame.settings_btn.configure(command=self.settings_button, state='disabled')
         self.main_frame.download_btn.configure(command=self.download, state='disabled')
         self.main_frame.signin_btn.configure(command=self.signin_button)
 
@@ -79,33 +73,7 @@ class StartGUI(ttk.Frame):
         image = self.floor_plan_label['image'][0]
         image.save('floor_plan.png')
 
-
-
-    def stop_threads(self):
-        print("thread list: ", thread_list := threading.enumerate())
-        for thread in thread_list:
-            if thread.name != 'MainThread' and 'pydev' not in thread.name:
-                ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, ctypes.py_object(SystemExit))
-                thread.join()
-        PcapLogic.stop_pcap_bool = True # Stop FeedbackWidget thread
-        self.main_frame.message_label_middle.config(text="")
-        print(f"thread list after remove: ", threading.enumerate())
-        PcapLogic.stop_pcap_bool = False
-
-    def open_file(self, extension, dest_port):
-
-        def insert_to_gui_thread():
-            # check if pcap_bool turned on, is so, call select_plots
-            self.after_idle(self.select_plots)
-
-        def check_pcap(callback):
-            while not PcapLogic.stop_pcap_bool:
-                time.sleep(3)
-            callback()
-
-        # stop previous load_pcap action
-        self.stop_threads()
-
+    def open_file(self, extension):
         self.selected.set(-1)
         title = "Please choose " + extension + " file to work with"
         self.path = askopenfilename(filetypes=[("Custom Files:", extension)], title=title)
@@ -285,15 +253,6 @@ class StartGUI(ttk.Frame):
             # ttk.Label(self.dynamic_scheme_frame, text="Out doors").grid(row=3, column=out_i+2, sticky='w')
             # ttk.Entry(self.dynamic_scheme_frame, width=10).grid(row=3, column=out_i+3, sticky='w')
             # ttk.Button(self.dynamic_scheme_frame, text="OK", command=self.new_window.destroy, style="Blue.TButton").grid(row=3, columnspan=(self.num_of_rooms+4*2))
-            
-            
-
-            t = PcapLogic.AsyncPcap2Bin(self.path, dest_port, self.main_frame.message_label_middle)
-            FeedbackWidgets.AsyncPcap2Bin(self.main_frame.message_label_middle).start()
-
-            thread = Thread(target=check_pcap, args=(insert_to_gui_thread,))
-            thread.start()
-            t.start()
 
         else:
             messagebox.showerror(message="Selected file is not supported.")
@@ -328,17 +287,6 @@ class StartGUI(ttk.Frame):
         self.notebook_plots.grid(row=0, column=0, sticky="nswe")
         ad_new_tab_flag = False
 
-    def settings_button(self):
-        self.selected.set(-1)
-        self.notebook_plots.grid_remove()
-
-        # if self.notebook_settings.counter == 0:
-            # self.create_sites_tab()  # tab[0]
-            # self.create_settings_tab()  # tab[1]
-        # self.notebook_settings.grid(row=0, column=0, sticky="nswe")
-
-    def play_with_bubble_diagram_btn(self):
-        from GUI.PythonCode import GRAPH
     def signin_button(self):
         self.selected.set(-1)
         # self.main_frame.center_frame.grid_remove()
@@ -397,130 +345,22 @@ class StartGUI(ttk.Frame):
     def add_train_model_button(self):
         self.main_frame.train_model_btn.grid(row=6, column=0, padx=5, pady=5)
 
-
-    def create_sites_tab(self):
-        frame = MyFrame(self.notebook_settings)
-        frame.grid(row=0, column=0, sticky="nswe")
-
-        self.notebook_settings.tabs.append(frame)
-        self.notebook_settings.add(frame, text='Sites')
-        self.notebook_settings.counter += 1
-
-        frame.grid_rowconfigure(0, weight=1)
-        frame.grid_rowconfigure(1, weight=30)
-
-        pick_sites_text = "Choose sites to present on graph:"
-        pick_sites_label = ttk.Label(frame, style="Settings.TLabel", text=pick_sites_text, font=("Helvetica", 12))
-        pick_sites_label.grid(row=0, column=0, sticky="w")
-
-        bottom_frame = ttk.Frame(frame, style='Custom.TFrame')
-        bottom_frame.grid(row=2, column=0, sticky="we")
-        bottom_frame.grid_columnconfigure(0, weight=1)
-        bottom_frame.grid_columnconfigure(1, weight=1)
-        bottom_frame.grid_columnconfigure(2, weight=1)
-
-        left_bottom_frame = ttk.Frame(bottom_frame, style='Custom.TFrame')
-        left_bottom_frame.grid(row=0, column=0, sticky="nswe")
-        left_bottom_frame.grid_rowconfigure(0, weight=1)
-        select_all_btn = ttk.Button(left_bottom_frame, style='Blue.TButton', text="select all",
-                                    command=self.select_all)
-        select_all_btn.grid(row=0, column=0)
-        deselect_all_btn = ttk.Button(left_bottom_frame, style='Blue.TButton', text="deselect all",
-                                      command=self.deselect_all)
-        deselect_all_btn.grid(row=0, column=1)
-
-        middle_bottom_frame = ttk.Frame(bottom_frame, style='Custom.TFrame')
-        middle_bottom_frame.grid(row=0, column=1, sticky="nswe")
-        middle_bottom_frame.grid_columnconfigure(0, weight=1)
-        search_label = ttk.Label(middle_bottom_frame, style="Settings.TLabel", text='Search')
-        search_label.grid(row=0, column=0)
-        search_entry = Entry(middle_bottom_frame)
-        search_entry.grid(row=1, column=0)
-
-        scrolled_text = ScrolledText(frame, width=20, height=10, relief="flat")
-        scrolled_text.grid(row=1, column=0, sticky="nwse")
-
-        sites = AppBoot.sites_dict.get('sites').split(':')
-
-        btn = ttk.Checkbutton
-        i = 0
-        for site in PcapLogic.deciphered_bin_df.columns:
-            # create widgets
-            self.btns.append(btn := ttk.Checkbutton(scrolled_text, text=site, style="Custom.TCheckbutton"))
-            if site in sites:
-                btn.state(['selected'])
-
-            btn.configure(command=lambda b=btn, site_name=site: self.update_select_plots(site_name, b.state()))
-
-            btn.grid(row=i, column=0, sticky="w")
-            scrolled_text.window_create('end', window=btn)
-            scrolled_text.insert('end', '\n')
-            i += 1
-
-        def get(event):
-            to_search = search_entry.get()
-            if to_search:
-                for check_btn in self.btns:
-                    if to_search == check_btn.cget("text"):
-                        scrolled_text.tag_add('found', check_btn, check_btn)
-                        scrolled_text.see(check_btn)
-                        check_btn.configure(style='Selected.TCheckbutton')
-                        check_btn.state(['selected'])
-                    elif to_search in check_btn.cget("text"):
-                        scrolled_text.tag_add('found', check_btn, check_btn)
-                        scrolled_text.see(check_btn)
-                        check_btn.configure(style='Selected.TCheckbutton')
-                    else:
-                        check_btn.configure(style='Custom.TCheckbutton')
-
-        search_entry.bind("<Return>", get)
-        self.notebook_settings.update()
-
     def select_all(self):
         for btn in self.btns:
             btn.state(['selected'])
-            AppBoot.add_new_param_to_ini(btn.cget("text"), btn.cget("state"))
         self.notebook_plots = self.notebook_plots.destroy()
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
 
     def deselect_all(self):
         for btn in self.btns:
             btn.state(['!selected'])
-            AppBoot.add_new_param_to_ini(btn.cget("text"), btn.cget("state"))
         self.notebook_plots = self.notebook_plots.destroy()
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
 
     def update_select_plots(self, site_name, btn_state):
-        AppBoot.add_new_param_to_ini(site_name, btn_state)
         self.notebook_plots = self.notebook_plots.destroy()
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
-
-    def save_settings(self):
-        # self.ab.dest_ip = self.ip_entry.get()
-        self.ab.dest_port = self.port_entry.get()
-        ConfigParser.change_settings("destination port", str(self.ab.dest_port))
-
-    def create_settings_tab(self):
-        self.notebook_settings.tabs.append(frame := tk.Frame(self.notebook_settings, bg='white'))  # tab[1]
-        self.notebook_settings.add(frame, text='SETTINGS')
-        self.notebook_settings.counter += 1
-
-        font = ("Helvetica", 12)
-        ttk.Label(frame, style='Settings.TLabel', text='Destination IP = ', font=font).grid(row=0, column=0,
-                                                                                            sticky="e")
-        ttk.Label(frame, style='Settings.TLabel', text='Destination Port = ', font=font).grid(row=1, column=0,
-                                                                                              sticky="e")
-        ttk.Button(frame, style='Blue.TButton', text='Save', command=self.save_settings).grid(row=2, column=0,
-                                                                                                sticky="e")
-        
-        width = 100
-        self.port_entry = ttk.Entry(frame, width=width)
-        self.port_entry.grid(row=0, column=1)
-        self.port_entry.insert(0, self.ab.dest_port)
-
-        
-
-
+   
 def place_center(w1, width, height):  # Placing the window in the center of the screen
     reso = pg.size()
     rx = reso[0]
@@ -530,8 +370,6 @@ def place_center(w1, width, height):  # Placing the window in the center of the 
     width_str = str(width)
     height_str = str(height)
     w1.geometry(width_str + "x" + height_str + "+" + str(x) + "+" + str(y))
-
-
 
 def show_hello_message(self):
     from GUI.Styles import PinkPallete as P
