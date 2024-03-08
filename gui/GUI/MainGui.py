@@ -121,9 +121,9 @@ class StartGUI(ttk.Frame):
             self.add_door_btn.grid(row=5, column=1, sticky="w")
             ttk.Label(self.main_frame.right_frame, text="Room Type:").grid(row=6, column=1, sticky="w")
             self.room_type_entry.grid(row=6, column=2, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="edges neighbour room types:").grid(row=7, column=1, sticky="w")
+            ttk.Label(self.main_frame.right_frame, text="types of neigbour edges (if no neighbour, type 0)").grid(row=7, column=1, sticky="w")
             self.edges_neighbour_room_types.grid(row=7, column=2, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="edges neighbour room indexes:").grid(row=8, column=1, sticky="w")
+            ttk.Label(self.main_frame.right_frame, text="indexes of neigbour edges (if no neighbour, type N)").grid(row=8, column=1, sticky="w")
             self.edges_neighbour_room_indexes.grid(row=8, column=2, sticky="w")
 
         # elif extensions of images
