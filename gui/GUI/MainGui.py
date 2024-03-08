@@ -106,6 +106,8 @@ class StartGUI(ttk.Frame):
             self.edges_neighbour_room_indexes = ttk.Entry(self.main_frame.right_frame, width=10, textvariable=edit_json_gui.edges_neighbour_room_indexes_sv)
             self.add_room_btn = ttk.Button(self.main_frame.right_frame, text="Add Room", 
                                             command=lambda: edit_json_gui.add_random_room())
+            self.add_door_btn = ttk.Button(self.main_frame.right_frame, text="Add Door", 
+                                                        command=lambda: edit_json_gui.add_random_door())
             
 
             
@@ -116,12 +118,13 @@ class StartGUI(ttk.Frame):
             self.edge_selection.grid(row=2, column=1, sticky="w")
             self.room_selection.grid(row=3, column=1, sticky="w")
             self.add_room_btn.grid(row=4, column=1, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="Room Type:").grid(row=5, column=1, sticky="w")
-            self.room_type_entry.grid(row=5, column=2, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="edges neighbour room types:").grid(row=6, column=1, sticky="w")
-            self.edges_neighbour_room_types.grid(row=6, column=2, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="edges neighbour room indexes:").grid(row=7, column=1, sticky="w")
-            self.edges_neighbour_room_indexes.grid(row=7, column=2, sticky="w")
+            self.add_door_btn.grid(row=5, column=1, sticky="w")
+            ttk.Label(self.main_frame.right_frame, text="Room Type:").grid(row=6, column=1, sticky="w")
+            self.room_type_entry.grid(row=6, column=2, sticky="w")
+            ttk.Label(self.main_frame.right_frame, text="types of neigbour edges (if no neighbour, type 0)").grid(row=7, column=1, sticky="w")
+            self.edges_neighbour_room_types.grid(row=7, column=2, sticky="w")
+            ttk.Label(self.main_frame.right_frame, text="indexes of neigbour edges (if no neighbour, type N)").grid(row=8, column=1, sticky="w")
+            self.edges_neighbour_room_indexes.grid(row=8, column=2, sticky="w")
 
         # elif extensions of images
         elif extension == "png" or extension == "jpg" or extension == "jpeg":
