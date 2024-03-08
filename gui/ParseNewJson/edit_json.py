@@ -114,13 +114,15 @@ def reorganize_json(data):
             from_edge_index = to_edge_index
             prev_room_index = curr_room_index
 
-    room_or_door_string = original_room_types[prev_room_index]
-    room_or_door_string = "rooms" if room_or_door_string < 11 else "doors"
-    new_room = {prev_room_index:{"edges": original_edges[from_edge_index:to_edge_index+1],
-                                    "ed_rm": original_ed_rm[from_edge_index:to_edge_index+1],
-                                    "boxes": original_boxes[prev_room_index],
-                                    "room_type": original_room_types[prev_room_index]}}
-    
+    try:
+        room_or_door_string = original_room_types[prev_room_index]
+        room_or_door_string = "rooms" if room_or_door_string < 11 else "doors"
+        new_room = {prev_room_index:{"edges": original_edges[from_edge_index:to_edge_index+1],
+                                        "ed_rm": original_ed_rm[from_edge_index:to_edge_index+1],
+                                        "boxes": original_boxes[prev_room_index],
+                                        "room_type": original_room_types[prev_room_index]}}
+    except:
+        print("adding last room failed.")
     new_json[f"{room_or_door_string}"].update(new_room)
     from_edge_index = to_edge_index
     prev_room_index = curr_room_index

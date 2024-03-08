@@ -94,13 +94,13 @@ class StartGUI(ttk.Frame):
 
             # new
             reorganized_json = edit_json.reorganize_json(original_data)
-            edit_json_gui.init_gui(self.main_frame, MAX_X, MAX_Y, original_data, reorganized_json, self.root)
+            edit_json_gui.init_gui(self.main_frame, MAX_X, MAX_Y, original_data, reorganized_json, self.root, "init")
 
             # buttons
             self.save_new_json = ttk.Button(self.main_frame.right_frame, text="Save new Json", command=lambda: edit_json_gui.on_close(original_data, file_path_name, self.main_frame.message_label_middle, self.root, reorganized_json))
             self.edge_selection = ttk.Button(self.main_frame.right_frame, text="Edge selection", command=lambda: edit_json_gui.draw_edges(reorganized_json, self.root))
             self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui.draw_boxes(reorganized_json, self.root))
-            self.clear = ttk.Button(self.main_frame.right_frame, text="Clear", command=lambda: edit_json_gui.on_clear(self.main_frame.right_frame))
+            self.clear = ttk.Button(self.main_frame.right_frame, text="Clear", command=lambda: edit_json_gui.on_clear(self.main_frame))
             
             self.room_type_entry = ttk.Entry(self.main_frame.right_frame, width=10, text="Room Type")
             self.edges_neighbour_room_types = ttk.Entry(self.main_frame.right_frame, width=10, text="example: 1,2,2,3")

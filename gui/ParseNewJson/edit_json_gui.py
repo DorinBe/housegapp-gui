@@ -35,7 +35,7 @@ selected_edge = tkinter.StringVar
 MAX_X = 0
 MAX_Y = 0
 
-def init_gui(main_frame, width, height, _original_json, _reorganized_json, _root):
+def init_gui(main_frame, width, height, _original_json, _reorganized_json, _root, command:str):
     """originally added for implementing the is_inner_room feature to train model to output inner rooms"""
 
     global canvas, combobox, MAX_X, MAX_Y, original_json, reorganized_json,selected_edge
@@ -60,10 +60,11 @@ def init_gui(main_frame, width, height, _original_json, _reorganized_json, _root
 
     combobox.bind("<<ComboboxSelected>>", partial(on_combo_change))
 
-    reorganized_json = edit_json.add_is_inner_room(reorganized_json)
-
-    draw_boxes(reorganized_json, _root)
-    draw_edges(reorganized_json, _root)
+    if command != "clear":
+        draw_boxes(reorganized_json, _root)
+        draw_edges(reorganized_json, _root)
+        reorganized_json = edit_json.add_is_inner_room(reorganized_json)
+    canvas.bind("<1>", on_canvas_click)
 
 def on_combo_change(event):
     global reorganized_json, canvas
@@ -410,7 +411,7 @@ def on_close(originaldata, path, message_label_middle, root, reorganized_data):
     new_path = dump_boxes(path, original_format_json)
     message_label_middle.config(text=new_path)
 
-def on_clear():
+def on_clear(main_frame):
     global edge_map, room_map, reorganized_json, edge_selection, room_selection, ed_rm_list
     global start_x, start_y, current_edge, current_rectangle, drag_mode
     global root, canvas, combobox, original_json
@@ -431,7 +432,7 @@ def on_clear():
     canvas =  tkinter.Canvas
     combobox = ttk.Combobox
 
-    init_gui(root, 800, 600, original_json, reorganized_json)
+    init_gui(main_frame, 800, 600, original_json, reorganized_json, root, "clear")
 
 def get_last_room_index():
     # item_id = list(room_map)[-1]
