@@ -31,6 +31,15 @@ canvas =  tkinter.Canvas
 combobox = tkinter.ttk.Combobox
 
 selected_edge = tkinter.StringVar
+room_type_sv = tkinter.StringVar
+edges_neighbour_room_types_sv = tkinter.StringVar
+edges_neighbour_room_indexes_sv = tkinter.StringVar
+
+LEFT = 0
+TOP = 1
+RIGHT = 2
+BOTTOM = 3
+
 
 MAX_X = 0
 MAX_Y = 0
@@ -39,6 +48,7 @@ def init_gui(main_frame, width, height, _original_json, _reorganized_json, _root
     """originally added for implementing the is_inner_room feature to train model to output inner rooms"""
 
     global canvas, combobox, MAX_X, MAX_Y, original_json, reorganized_json,selected_edge
+    global room_type_sv, edges_neighbour_room_types_sv, edges_neighbour_room_indexes_sv
     MAX_X = width
     MAX_Y = height
     original_json = _original_json
@@ -59,6 +69,10 @@ def init_gui(main_frame, width, height, _original_json, _reorganized_json, _root
     selected_edge_dynamic.grid(row=4, column=0, sticky="nswe")
 
     combobox.bind("<<ComboboxSelected>>", partial(on_combo_change))
+
+    room_type_sv = tkinter.StringVar()
+    edges_neighbour_room_types_sv = tkinter.StringVar()
+    edges_neighbour_room_indexes_sv = tkinter.StringVar()
 
     if command != "clear":
         draw_boxes(reorganized_json, _root)
@@ -484,8 +498,42 @@ def add_edge_random(random_edges,room_index):
     canvas.bind("<B1-Motion>", partial(drag))
     canvas.bind("<ButtonRelease-1>", partial(end_drag))
 
-def add_random_room(room_type, edges_neighbour_room_types, edges_neighbour_room_indexes):
+def increment_doors_index():
+    last_door_index = list(reorganized_json["rooms"])[-1]+1
+    combined_ed_list = []
+    for value in {**reorganized_json["rooms"], **reorganized_json["doors"]}.values():
+        for _list in value["ed_rm"]:
+            combined_ed_list.append(_list)
+        
+
+    for ed_rm in combined_ed_list:
+        if ed_rm[0] == last_door_index:
+            ed_rm[0] = ed_rm[0]+1
+        try:
+            if ed_rm[1] == last_door_index:
+                ed_rm[1] = ed_rm[1]+1
+        except: # not every ed_rm has 2 elements
+            pass
+
+
+def update_edges_and_ed_rm_to_add_random_room(room_index, room_type, types, neighbours_indexes):
+    global reorganized_json
+
+    for i, index in enumerate(neighbours_indexes):
+        if index is None:
+            continue
+        index = int(index)
+        _ed_rm = reorganized_json["rooms"][index]["ed_rm"] # get the ed_rm of the neighbour room
+        _edges = reorganized_json["rooms"][index]["edges"] # get the edges of the neighbour room
+        _i =  (i % 4)
+        _ed_rm[_i] = [index, room_index] # give neighbour the new room's index
+        _edges[_i][5] = int(room_type) # give neighbour the new room's type
+
+def add_random_room():
     global ed_rm_list
+    room_type = room_type_sv.get()
+    edges_neighbour_room_types = edges_neighbour_room_types_sv.get()
+    edges_neighbour_room_indexes = edges_neighbour_room_indexes_sv.get()
 
     edges_room_types = edges_neighbour_room_types.split(",")
     edges_neighbour_room_indexes = edges_neighbour_room_indexes.split(',')
@@ -494,6 +542,13 @@ def add_random_room(room_type, edges_neighbour_room_types, edges_neighbour_room_
         return
     
     random_box = [400,90,450,130]
+
+    #TODO before adding new rooms and edges to reorganized_json,
+    # change the overrideden edges_room_types and ed_rm_indexes
+    increment_doors_index()
+    room_index = get_last_room_index()
+    update_edges_and_ed_rm_to_add_random_room(room_index-1, room_type, edges_neighbour_room_types, edges_neighbour_room_indexes)
+
     room_index, room_type = add_box_random(random_box, room_type)
 
     random_edges = [[400,90,400,130,room_index, int(edges_room_types[0])],

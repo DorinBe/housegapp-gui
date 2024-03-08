@@ -150,11 +150,12 @@ def deorganize_format(reorganized_json):
         original_json["boxes"].append(boxes)
         original_json["edges"].extend(edges)
         original_json["ed_rm"].extend(ed_rm)
-
-    for door in reorganized_json["doors"].items():
-        edges = room[1]["edges"]
-        boxes = room[1]["boxes"]
-        ed_rm = room[1]["ed_rm"]
+    
+    last_room_index = list(reorganized_json["rooms"])[-1]
+    for door in reorganized_json["doors"].items():        
+        edges = door[1]["edges"]
+        boxes = door[1]["boxes"]
+        ed_rm = door[1]["ed_rm"]
 
         original_json["boxes"].append(boxes)
         original_json["edges"].extend(edges)

@@ -29,7 +29,6 @@ MAX_X, MAX_Y = 1400, 800
 ad_new_tab_flag = False
 admin_flag = False
 
-
 class StartGUI(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -102,14 +101,11 @@ class StartGUI(ttk.Frame):
             self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui.draw_boxes(reorganized_json, self.root))
             self.clear = ttk.Button(self.main_frame.right_frame, text="Clear", command=lambda: edit_json_gui.on_clear(self.main_frame))
             
-            self.room_type_entry = ttk.Entry(self.main_frame.right_frame, width=10, text="Room Type")
-            self.edges_neighbour_room_types = ttk.Entry(self.main_frame.right_frame, width=10, text="example: 1,2,2,3")
-            self.edges_neighbour_room_indexes = ttk.Entry(self.main_frame.right_frame, width=10, text="example: 1,2,2,3")
+            self.room_type_entry = ttk.Entry(self.main_frame.right_frame, width=10, text="Room Type", textvariable=edit_json_gui.room_type_sv)
+            self.edges_neighbour_room_types = ttk.Entry(self.main_frame.right_frame, width=10, textvariable=edit_json_gui.edges_neighbour_room_types_sv)
+            self.edges_neighbour_room_indexes = ttk.Entry(self.main_frame.right_frame, width=10, textvariable=edit_json_gui.edges_neighbour_room_indexes_sv)
             self.add_room_btn = ttk.Button(self.main_frame.right_frame, text="Add Room", 
-                                            command=lambda: edit_json_gui.add_random_room(
-                                                self.room_type_entry.get(),
-                                                self.edges_neighbour_room_types.get(),
-                                                self.edges_neighbour_room_indexes.get()))
+                                            command=lambda: edit_json_gui.add_random_room())
             
 
             
