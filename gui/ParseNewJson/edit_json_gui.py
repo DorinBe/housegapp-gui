@@ -149,7 +149,10 @@ def draw_boxes(data, _root):
                                                                                                         f"{room_type}-{room_index}"))
         room_map[item_id] = box
         x, y = edit_json.calculate_averge_of_box(box)
-        label_id = canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=(f"label-room-{item_id}", "label"))
+        label_id = canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=("label",
+                                                                                            f"label_room_index:{room_index}",
+                                                                                            f"label_room_type:{room_type}",
+                                                                                            f"label_item_id:{item_id}"))
         canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
         
     
@@ -168,7 +171,7 @@ def on_mouse_down(event):
     tags = canvas.gettags(item)
     if "box" in tags:
         current_rectangle = item
-        room_index = tags[3].split(":")[1]
+        room_index = tags[1].split(":")[1]
         print(f"Selected box index: {room_index}")
 
         start_x, start_y = event.x, event.y
@@ -201,6 +204,7 @@ def on_mouse_move(event):
     if current_rectangle and action_type == "move":
         dx, dy = event.x - start_x, event.y - start_y
         canvas.move(current_rectangle, dx, dy)
+        canvas.move(f"label_item_id:{current_rectangle}", dx, dy)
     elif current_rectangle and action_type == "resize":
         x1, y1, x2, y2 = canvas.coords(current_rectangle)
 
@@ -287,8 +291,11 @@ def draw_edges(data, _root):
 
                 if (room_type < 10):
                     x, y = edit_json.calculate_averge_of_box(box)
-                    label_id = canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=(f"label-room-{room_index}", "label"))
-                    canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
+                    # label_id = canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=("label",
+                    #                                                                                     f"label_room_index:{room_index}",
+                    #                                                                                     f"label_room_type:{room_type}",
+                    #                                                                                     f"label_item_id:{item_id}"))
+                    # canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
                     
             except Exception as e:
                 traceback.format_exc(e)
