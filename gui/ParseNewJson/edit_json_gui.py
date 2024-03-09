@@ -456,11 +456,11 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
                                          tags=("box", "random_box"
                                             f"room_index:{room_index}",
                                             f"room_type:{room_type}"))
-        reorganized_json["room_types"].insert(new_index_for_label, room_type)
+        reorganized_json["room_types"].insert(new_index, room_type)
 
         room_map[box_id] = random_box #TODO is it also for doors? 
         x, y = edit_json.calculate_averge_of_box(random_box)
-        label_id=canvas.create_text(x, y, text=f"{new_index_for_label}", font=("Arial", 10), tags=("label",
+        label_id=canvas.create_text(x, y, text=f"{new_index}", font=("Arial", 10), tags=("label",
                                                                                                    "random-label",
                                                                                                    f"label_room_index:{new_index}",
                                                                                                    f"label_room_type:{room_type}",
