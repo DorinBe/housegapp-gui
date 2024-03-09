@@ -461,10 +461,10 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
         room_map[box_id] = random_box #TODO is it also for doors? 
         x, y = edit_json.calculate_averge_of_box(random_box)
         label_id=canvas.create_text(x, y, text=f"{new_index}", font=("Arial", 10), tags=("label",
-                                                                                                   "random-label",
-                                                                                                   f"label_room_index:{new_index}",
-                                                                                                   f"label_room_type:{room_type}",
-                                                                                                   f"label_item_id:{box_id}"))
+                                                                                        "random-label",
+                                                                                        f"label_room_index:{new_index}",
+                                                                                        f"label_room_type:{room_type}",
+                                                                                        f"label_item_id:{box_id}"))
         canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
     
         canvas.bind("<1>", on_canvas_click)
@@ -689,25 +689,25 @@ def on_mouse_up_together(event):
 def move_up(event):
     global current_rectangle, canvas, room_index_together
     canvas.move(current_rectangle, 0, -units)  # Move up by 'units' units
-    canvas.move(f"label-room-{current_rectangle}", 0, -units)
+    canvas.move(f"label_room_index:{room_index_together}", 0, -units)
     canvas.move(f"edge_room_index:{room_index_together}", 0, -units)
 
 def move_down(event):
     global current_rectangle, canvas, room_index_together
     canvas.move(current_rectangle, 0, units)  # Move down by 10 units
-    canvas.move(f"label-room-{current_rectangle}", 0, units)
+    canvas.move(f"label_room_index:{room_index_together}", 0, units)
     canvas.move(f"edge_room_index:{room_index_together}", 0, units)
 
 def move_left(event):
     global current_rectangle, canvas, room_index_together
     canvas.move(current_rectangle, -units, 0)  # Move left by 10 units
-    canvas.move(f"label-room-{current_rectangle}", -units, 0)
+    canvas.move(f"label_room_index:{room_index_together}", -units, 0)
     canvas.move(f"edge_room_index:{room_index_together}", -units, 0)
 
 def move_right(event):
     global current_rectangle, canvas, room_index_together
     canvas.move(current_rectangle, units, 0)  # Move right by 10 units
-    canvas.move(f"label-room-{current_rectangle}", units, 0)
+    canvas.move(f"label_room_index:{room_index_together}", units, 0)
     canvas.move(f"edge_room_index:{room_index_together}",  units, 0)
 
 def move_edges_and_boxes_together():
