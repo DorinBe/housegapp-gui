@@ -82,26 +82,6 @@ def on_combo_change(event):
     val = combobox.get()
     reorganized_json["rooms"][int(selected_edge.get())]["is_inner_room"] = val
 
-# def move_up(event):
-#     global current_rectangle, canvas
-#     canvas.move(current_rectangle, 0, -units)  # Move up by 'units' units
-#     canvas.move(f"label-room-{current_rectangle}", 0, -units)
-
-# def move_down(event):
-#     global current_rectangle, canvas
-#     canvas.move(current_rectangle, 0, units)  # Move down by 10 units
-#     canvas.move(f"label-room-{current_rectangle}", 0, units)
-
-# def move_left(event):
-#     global current_rectangle, canvas
-#     canvas.move(current_rectangle, -units, 0)  # Move left by 10 units
-#     canvas.move(f"label-room-{current_rectangle}", -units, 0)
-
-# def move_right(event):
-#     global current_rectangle, canvas
-#     canvas.move(current_rectangle, units, 0)  # Move right by 10 units
-#     canvas.move(f"label-room-{current_rectangle}", units, 0)
-
 def on_canvas_click(event):
     print("Canvas clicked at", event.x, event.y)
     event.widget.focus_set()  # Set focus to the canvas when it's clicked
@@ -134,8 +114,7 @@ def draw_boxes(data, _root):
         x1, y1, x2, y2 = box
         item_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", tags=("box",
                                                                                                         f"room_index:{room_index}",
-                                                                                                        f"room_type:{room_type}",
-                                                                                                        f"{room_type}-{room_index}"))
+                                                                                                        f"room_type:{room_type}"))
         room_map[item_id] = box
         x, y = edit_json.calculate_averge_of_box(box)
         label_id = canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=("label",
@@ -282,8 +261,7 @@ def draw_edges(data, _root):
         for index_in_edge_list,edge in enumerate(edges):
             try:
                 x1, y1, x2, y2, room_type, neighbour_room = edge
-                item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", 
-                                                                                          f"{room_type}-{neighbour_room}",
+                item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge",
                                                                                           f"edge_room_index:{room_index}"))
                 edge_map[item_id] = edge                    
             except Exception as e:
@@ -475,23 +453,18 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
             new_index_for_label = new_index + list(reorganized_json["rooms"])[-1]
         room_type = int(room_or_door_type)
         box_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", 
-                                         tags=("box",
+                                         tags=("box", "random_box"
                                             f"room_index:{room_index}",
-                                            f"room_type:{room_type}",
-                                            f"{room_type}-{room_index}"))
+                                            f"room_type:{room_type}"))
         reorganized_json["room_types"].insert(new_index_for_label, room_type)
 
         room_map[box_id] = random_box #TODO is it also for doors? 
-        # reorganized_json["rooms" if room_or_door == "room" else "doors"].update({
-        #     new_index:{
-        #         "boxes":random_box,
-        #         "edges":[],
-        #         "ed_rm":[],
-        #         "room_type":room_or_door_type
-        #     }
-        # })
         x, y = edit_json.calculate_averge_of_box(random_box)
-        label_id=canvas.create_text(x, y, text=f"{new_index_for_label}", font=("Arial", 10), tags=(f"label-{room_or_door}-{box_id}","random-label", "label"))
+        label_id=canvas.create_text(x, y, text=f"{new_index_for_label}", font=("Arial", 10), tags=("label",
+                                                                                                   "random-label",
+                                                                                                   f"label_room_index:{new_index}",
+                                                                                                   f"label_room_type:{room_type}",
+                                                                                                   f"label_item_id:{box_id}"))
         canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
     
         canvas.bind("<1>", on_canvas_click)
@@ -505,10 +478,15 @@ def add_edge_random(random_edges,room_index, rooms_or_doors):
     for edge in random_edges:
         x1, y1, x2, y2, room_type, neighbour_room = edge
         item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", 
-                                                                                    f"{room_type}-{neighbour_room}",
-                                                                                    f"edge_room_index:{room_index}"))
+                                                                                  "random_edge",
+                                                                                f"edge_room_index:{room_index}"))
         edge_map[item_id] = edge
         reorganized_json[rooms_or_doors][room_index]["edges"].append(edge)
+
+def change_tag_to_new_index(old_tag, new_tag):
+    global canvas
+    canvas.addtag_withtag(new_tag, old_tag)
+    canvas.dtag(new_tag, old_tag)
 
 def increment_doors_index(new_room_index):
     """is called only when adding new room because room is added 
@@ -524,20 +502,17 @@ def increment_doors_index(new_room_index):
         
     for ed_rm in combined_ed_list:
         if ed_rm[0] >= new_room_index:
+            change_tag_to_new_index(f"room_index:{ed_rm[0]}", f"room_index:{ed_rm[0]+1}")
+            change_tag_to_new_index(f"edge_room_index:{ed_rm[0]}", f"edge_room_index:{ed_rm[0]+1}")
+            items_with_old_tag = canvas.find_withtag(f"label_room_index:{ed_rm[0]}")
+            for item in items_with_old_tag:
+                    canvas.itemconfig(item, text=f"{ed_rm[0]+1}")
             ed_rm[0] = ed_rm[0]+1
-        try:
-            if ed_rm[1] >= new_room_index:
-                ed_rm[1] = ed_rm[1]+1
-        except:
-            pass
-    # for ed_rm in combined_ed_list:
-    #     if ed_rm[0] == last_door_index:
-    #         ed_rm[0] = ed_rm[0]+1
-    #     try:
-    #         if ed_rm[1] == last_door_index:
-    #             ed_rm[1] = ed_rm[1]+1
-    #     except: # not every ed_rm has 2 elements
-    #         pass
+            try:
+                if ed_rm[1] >= new_room_index:
+                    ed_rm[1] = ed_rm[1]+1
+            except: # not all doors have 2nd index
+                pass 
 
     new_doors_dict = {}
 
