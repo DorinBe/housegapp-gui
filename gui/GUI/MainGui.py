@@ -108,6 +108,8 @@ class StartGUI(ttk.Frame):
                                             command=lambda: edit_json_gui.add_random_room())
             self.add_door_btn = ttk.Button(self.main_frame.right_frame, text="Add Door", 
                                                         command=lambda: edit_json_gui.add_random_door())
+            self.move_edges_and_boxes_together = ttk.Button(self.main_frame.right_frame, text="Move edges and boxes together",
+                                                            command=lambda: edit_json_gui.move_edges_and_boxes_together())
             
 
             
@@ -125,6 +127,7 @@ class StartGUI(ttk.Frame):
             self.edges_neighbour_room_types.grid(row=7, column=2, sticky="w")
             ttk.Label(self.main_frame.right_frame, text="indexes of neigbour edges (if no neighbour, type N)").grid(row=8, column=1, sticky="w")
             self.edges_neighbour_room_indexes.grid(row=8, column=2, sticky="w")
+            self.move_edges_and_boxes_together.grid(row=9, column=1, sticky="w")
 
         # elif extensions of images
         elif extension == "png" or extension == "jpg" or extension == "jpeg":

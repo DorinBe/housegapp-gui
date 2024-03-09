@@ -6,10 +6,11 @@ from ParseNewJson import edit_json
 import json
 import traceback
 
-
 # ANSI escape codes
 RED = '\033[31m'  # Red text
 GREEN = '\033[32m'  # Green text
+BLUE = '\033[34m'  # Blue text
+YELLOW = '\033[33m'  # Yellow text
 RESET = '\033[0m'  # Reset to default color
 DEBUG = True
 
@@ -21,9 +22,10 @@ original_json = {}
  
 edge_selection = False
 room_selection = False
+room_edge_selection = False
 units = 1  # pixels
 
-start_x = start_y = current_edge = current_rectangle = None
+start_x = start_y = current_edge = current_rectangle = room_index_together = None
 drag_mode = None  # 'first', 'second', or None
 
 root=0
@@ -34,12 +36,6 @@ selected_edge = tkinter.StringVar
 room_type_sv = tkinter.StringVar
 edges_neighbour_room_types_sv = tkinter.StringVar
 edges_neighbour_room_indexes_sv = tkinter.StringVar
-
-LEFT = 0
-TOP = 1
-RIGHT = 2
-BOTTOM = 3
-
 
 MAX_X = 0
 MAX_Y = 0
@@ -86,30 +82,25 @@ def on_combo_change(event):
     val = combobox.get()
     reorganized_json["rooms"][int(selected_edge.get())]["is_inner_room"] = val
 
-def move_up(event):
-    global current_rectangle
-    canvas.move(current_rectangle, 0, -units)  # Move up by 'units' units
-    canvas.move(f"label-room-{current_rectangle}", 0, -units)
+# def move_up(event):
+#     global current_rectangle, canvas
+#     canvas.move(current_rectangle, 0, -units)  # Move up by 'units' units
+#     canvas.move(f"label-room-{current_rectangle}", 0, -units)
 
-def move_down(event):
-    global current_rectangle
-    canvas.move(current_rectangle, 0, units)  # Move down by 10 units
-    canvas.move(f"label-room-{current_rectangle}", 0, units)
+# def move_down(event):
+#     global current_rectangle, canvas
+#     canvas.move(current_rectangle, 0, units)  # Move down by 10 units
+#     canvas.move(f"label-room-{current_rectangle}", 0, units)
 
-def move_left(event):
-    global current_rectangle
-    canvas.move(current_rectangle, -units, 0)  # Move left by 10 units
-    canvas.move(f"label-room-{current_rectangle}", -units, 0)
+# def move_left(event):
+#     global current_rectangle, canvas
+#     canvas.move(current_rectangle, -units, 0)  # Move left by 10 units
+#     canvas.move(f"label-room-{current_rectangle}", -units, 0)
 
-def move_right(event):
-    global current_rectangle
-    canvas.move(current_rectangle, units, 0)  # Move right by 10 units
-    canvas.move(f"label-room-{current_rectangle}", units, 0)
-
-def move_up(event):
-    global current_rectangle
-    canvas.move(current_rectangle, 0, -units)  # Move up by 10 units
-    canvas.move(f"label-room-{current_rectangle}", 0, -units)
+# def move_right(event):
+#     global current_rectangle, canvas
+#     canvas.move(current_rectangle, units, 0)  # Move right by 10 units
+#     canvas.move(f"label-room-{current_rectangle}", units, 0)
 
 def on_canvas_click(event):
     print("Canvas clicked at", event.x, event.y)
@@ -117,10 +108,12 @@ def on_canvas_click(event):
 
 
 def draw_boxes(data, _root):
-    global edge_selection, room_selection, root
+    global edge_selection, room_selection, root, room_edge_selection, room_index_together, canvas
     root = _root
     edge_selection = False
     room_selection = True
+    room_edge_selection = False
+    room_index_together = None
 
     if room_map != {}:
         canvas.itemconfigure("edge", width=0.5, fill="gray")
@@ -132,10 +125,6 @@ def draw_boxes(data, _root):
         canvas.bind("<Button-1>", partial(on_mouse_down))
         canvas.bind("<B1-Motion>", partial(on_mouse_move))
         canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
-        root.bind("<Up>", partial(move_up))
-        root.bind("<Down>", partial(move_down))
-        root.bind("<Left>", partial(move_left))
-        root.bind("<Right>", partial(move_right))
         return
 
     for room in {**data["rooms"],**data["doors"]}.items():
@@ -160,22 +149,28 @@ def draw_boxes(data, _root):
     canvas.bind("<Button-1>", partial(on_mouse_down))
     canvas.bind("<B1-Motion>", partial(on_mouse_move))
     canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
-    root.bind("<Up>", partial(move_up))
-    root.bind("<Down>", partial(move_down))
-    root.bind("<Left>", partial(move_left))
-    root.bind("<Right>", partial(move_right))
 
 def on_mouse_down(event):
-    global current_rectangle, action_type, start_x, start_y, resize_edge
+    global current_rectangle, action_type, start_x, start_y, resize_edge, canvas
+    global room_index_together, room_edge_selection
+
     item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
     if "box" in tags:
         current_rectangle = item
         room_index = tags[1].split(":")[1]
-        print(f"Selected box index: {room_index}")
+        if room_edge_selection == True:
+            room_index_together = int(room_index)
+            canvas.itemconfigure("edge", width=0.5, fill="black")
+            canvas.itemconfigure("box", width=2, outline="black")
+            canvas.itemconfig(current_rectangle, outline="green")
+            canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
 
         start_x, start_y = event.x, event.y
-        x1, y1, x2, y2 = canvas.coords(current_rectangle)
+        try:
+            x1, y1, x2, y2 = canvas.coords(current_rectangle)
+        except:
+            print(f"{RED}Error in on_mouse_down:current_rectangle: {current_rectangle}")
         edge_margin = 5  # pixels
 
         on_left_edge = abs(x1 - event.x) < edge_margin
@@ -197,9 +192,12 @@ def on_mouse_down(event):
         action_type = "resize" if resize_edge else "move"
         canvas.itemconfig(current_rectangle, outline="green")
         canvas.focus_set()
+        return room_index
 
 def on_mouse_move(event):
-    global current_rectangle, action_type, start_x, start_y, drag_mode, resize_edge
+    global start_x, start_y,current_rectangle, drag_mode
+    global resize_edge, canvas, action_type, room_index_together
+    dx,dy = 0,0
 
     if current_rectangle and action_type == "move":
         dx, dy = event.x - start_x, event.y - start_y
@@ -236,8 +234,10 @@ def on_mouse_move(event):
 
     start_x, start_y = event.x, event.y
 
+    return dx,dy
+
 def on_mouse_up(event):
-    global current_rectangle, action_type, room_map
+    global current_rectangle, action_type, room_map, canvas
     canvas.itemconfig(current_rectangle, outline="black")
     action_type = None
 
@@ -248,21 +248,20 @@ def on_mouse_up(event):
         if current_rectangle in room_map:
             room_map[current_rectangle] = new_coords
 
-            for tag in tags:
-                if "room_index" in tag:
-                    room_index = int(tag.split(":")[1])
-                    # update the json with the new coordinates => no need concate newdata to originaldata
-                    reorganized_json["rooms"][room_index]["boxes"] = new_coords
-                    break
+            room_type = int(tags[2].split(":")[1])
+            rooms_or_doors = "doors" if room_type > 11 else "rooms"
+            room_index = int(tags[1].split(":")[1])
+            reorganized_json[rooms_or_doors][room_index]["boxes"] = new_coords
 
-
-        current_rectangle = None
+        # current_rectangle = None
 
 def draw_edges(data, _root):
     """input: reorganized_data"""
-    global edge_selection, room_selection
+    global edge_selection, room_selection, room_edge_selection, room_index_together, canvas
     edge_selection = True
     room_selection = False
+    room_edge_selection = False
+    room_index_together = None
     
     if edge_map != {}:
         canvas.itemconfigure("edge", width=2, fill="black")
@@ -285,18 +284,8 @@ def draw_edges(data, _root):
                 x1, y1, x2, y2, room_type, neighbour_room = edge
                 item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", 
                                                                                           f"{room_type}-{neighbour_room}",
-                                                                                          f"room_index:{room_index}",
-                                                                                          f"edge_index={index_in_edge_list}"))
-                edge_map[item_id] = edge
-
-                if (room_type < 10):
-                    x, y = edit_json.calculate_averge_of_box(box)
-                    # label_id = canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 10), tags=("label",
-                    #                                                                                     f"label_room_index:{room_index}",
-                    #                                                                                     f"label_room_type:{room_type}",
-                    #                                                                                     f"label_item_id:{item_id}"))
-                    # canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
-                    
+                                                                                          f"edge_room_index:{room_index}"))
+                edge_map[item_id] = edge                    
             except Exception as e:
                 traceback.format_exc(e)
 
@@ -305,7 +294,8 @@ def draw_edges(data, _root):
     canvas.bind("<ButtonRelease-1>", partial(end_drag))
 
 def start_drag(event):
-    global start_x, start_y, current_edge, drag_mode, selected_edge
+    global start_x, start_y, current_edge, drag_mode, selected_edge, canvas
+     
     item = canvas.find_closest(event.x, event.y)[0]  # Find the closest item to the click
     print(f"closeset item: {item}")
     tags = canvas.gettags(item)
@@ -323,11 +313,17 @@ def start_drag(event):
         # Determine if the click is near an endpoint
         drag_mode = is_close_to_endpoint(start_x, start_y, line_coords)
 
-def drag(event):
+def drag(event, _dx=None,_dy=None):
     global start_x, start_y, current_edge, drag_mode
+    global room_index_together, room_edge_selection, canvas
+
+    if room_edge_selection:
+        canvas.move(f"edge_room_index:{room_index_together}", _dx, _dy)
+
     if current_edge:
         dx = event.x - start_x
         dy = event.y - start_y
+
         if drag_mode == 'first':  # Dragging the first endpoint
             coords = canvas.coords(current_edge)
             canvas.coords(current_edge, event.x, event.y, coords[2], coords[3])
@@ -336,10 +332,11 @@ def drag(event):
             canvas.coords(current_edge, coords[0], coords[1], event.x, event.y)
         else:  # Moving the entire edge
             canvas.move(current_edge, dx, dy)
+
         start_x, start_y = event.x, event.y
 
 def end_drag(event):
-    global current_edge, drag_mode
+    global current_edge, drag_mode, canvas
     if current_edge:
         canvas.itemconfig(current_edge, fill="black", width=2)
         new_coords = canvas.coords(current_edge)
@@ -380,8 +377,6 @@ def output_newdata_to_original_format_with_is_inner_room(data, _root, reorganize
         new_data["is_inner_room"].append(items["is_inner_room"])
 
     return new_data
-
-
 
 def concate_newdata_to_originaldata(data, _root):
     """ Input: original data in original format
@@ -450,8 +445,9 @@ def on_clear(main_frame):
 
     edge_selection = False
     room_selection = False
+    room_edge_selection = False
 
-    start_x = start_y = current_edge = current_rectangle = None
+    start_x = start_y = current_edge = current_rectangle = room_index_together = None
     drag_mode = None  # 'first', 'second', or None
 
     root=0
@@ -468,6 +464,8 @@ def get_last_room_index():
     return room_index
 
 def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
+        global canvas, reorganized_json, room_map
+
         x1, y1, x2, y2 = random_box
         if room_or_door == "room":
             new_index = room_index
@@ -475,11 +473,13 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
         else:
             new_index = room_index
             new_index_for_label = new_index + list(reorganized_json["rooms"])[-1]
+        room_type = int(room_or_door_type)
         box_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", 
-                                         tags=("box", "random_box", f"{room_or_door_type}-{new_index_for_label}",
-                                               f"{room_or_door}_index:{new_index_for_label}",
-                                               f"{room_or_door}_type:{room_or_door_type}"))
-        reorganized_json["room_types"].insert(new_index_for_label, int(room_or_door_type))
+                                         tags=("box",
+                                            f"room_index:{room_index}",
+                                            f"room_type:{room_type}",
+                                            f"{room_type}-{room_index}"))
+        reorganized_json["room_types"].insert(new_index_for_label, room_type)
 
         room_map[box_id] = random_box #TODO is it also for doors? 
         # reorganized_json["rooms" if room_or_door == "room" else "doors"].update({
@@ -498,18 +498,15 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
         canvas.bind("<Button-1>", partial(on_mouse_down))
         canvas.bind("<B1-Motion>", partial(on_mouse_move))
         canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
-        root.bind("<Up>", partial(move_up))
-        root.bind("<Down>", partial(move_down))
-        root.bind("<Left>", partial(move_left))
-        root.bind("<Right>", partial(move_right))
         return new_index, room_or_door_type
 
 def add_edge_random(random_edges,room_index, rooms_or_doors):
+    global canvas, reorganized_json, edge_map
     for edge in random_edges:
         x1, y1, x2, y2, room_type, neighbour_room = edge
         item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", 
                                                                                     f"{room_type}-{neighbour_room}",
-                                                                                    f"room_index:{room_index}"))
+                                                                                    f"edge_room_index:{room_index}"))
         edge_map[item_id] = edge
         reorganized_json[rooms_or_doors][room_index]["edges"].append(edge)
 
@@ -701,4 +698,53 @@ def add_random_room():
             reorganized_json["rooms"][room_index]["ed_rm"].append(item)
         except KeyError as e:
             reorganized_json["rooms"][room_index]["ed_rm"] = [item]
+
+def on_mouse_down_together(event):
+    on_mouse_down(event)
+
+def on_mouse_move_together(event):
+    global room_index_together
+    dx,dy = on_mouse_move(event)
+    drag(event,dx,dy)
+
+def on_mouse_up_together(event):
+    on_mouse_up(event)
+    end_drag(event)
+    
+def move_up(event):
+    global current_rectangle, canvas, room_index_together
+    canvas.move(current_rectangle, 0, -units)  # Move up by 'units' units
+    canvas.move(f"label-room-{current_rectangle}", 0, -units)
+    canvas.move(f"edge_room_index:{room_index_together}", 0, -units)
+
+def move_down(event):
+    global current_rectangle, canvas, room_index_together
+    canvas.move(current_rectangle, 0, units)  # Move down by 10 units
+    canvas.move(f"label-room-{current_rectangle}", 0, units)
+    canvas.move(f"edge_room_index:{room_index_together}", 0, units)
+
+def move_left(event):
+    global current_rectangle, canvas, room_index_together
+    canvas.move(current_rectangle, -units, 0)  # Move left by 10 units
+    canvas.move(f"label-room-{current_rectangle}", -units, 0)
+    canvas.move(f"edge_room_index:{room_index_together}", -units, 0)
+
+def move_right(event):
+    global current_rectangle, canvas, room_index_together
+    canvas.move(current_rectangle, units, 0)  # Move right by 10 units
+    canvas.move(f"label-room-{current_rectangle}", units, 0)
+    canvas.move(f"edge_room_index:{room_index_together}",  units, 0)
+
+def move_edges_and_boxes_together():
+    global room_edge_selection, canvas
+    room_edge_selection = True
+    canvas.bind("<1>", on_canvas_click)
+    canvas.bind("<Button-1>", partial(on_mouse_down_together))
+    canvas.bind("<B1-Motion>", partial(on_mouse_move_together))
+    canvas.bind("<ButtonRelease-1>", partial(on_mouse_up_together))
+    canvas.bind("<Up>", partial(move_up))
+    canvas.bind("<Down>", partial(move_down))
+    canvas.bind("<Left>", partial(move_left))
+    canvas.bind("<Right>", partial(move_right))
+
 
