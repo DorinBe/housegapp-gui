@@ -8,8 +8,10 @@ class CreateCanvasJsonFrame(ttk.Frame):
 
         Button(text="Add Room", master = self,command=lambda: ejg.add_random_room())\
             .grid(row=0, column=0, sticky='w')
-        Button(text="Add Door", master=self, command=lambda: ejg.add_random_door())\
+        Button(text="Add Horizontal Door", master=self, command=lambda: ejg.add_random_door("horizontal"))\
             .grid(row=0, column=1, sticky='w')
+        Button(text="Add Vertical Door", master=self, command=lambda: ejg.add_random_door("vertical"))\
+            .grid(row=0, column=2, sticky='w')
         
         Label(text="Room Type:", master=self, )\
             .grid(row=1, column=0, sticky="w")
