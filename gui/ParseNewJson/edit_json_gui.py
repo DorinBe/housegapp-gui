@@ -5,6 +5,7 @@ from tkinter import messagebox
 from ParseNewJson import edit_json
 import json
 import traceback
+from globals import room_id_to_color, room_name_to_id
 
 # ANSI escape codes
 RED = '\033[31m'  # Red text
@@ -74,6 +75,8 @@ def on_combo_change(event):
 
 def on_canvas_click(event):
     print("Canvas clicked at", event.x, event.y)
+    # item_id = canvas.find_closest(event.x,event.y)
+    # canvas.find_withtag()
     event.widget.focus_set()  # Set focus to the canvas when it's clicked
 
 def draw_boxes(data, _root):
@@ -100,9 +103,11 @@ def draw_boxes(data, _root):
     for room in {**data["rooms"],**data["doors"]}.items():
         room_index = room[0]
         room_type = room[1]["room_type"]
+        room_color = room_id_to_color(room_type)
+        
         box = room[1]["boxes"]
         x1, y1, x2, y2 = box
-        item_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", tags=("box",
+        item_id = canvas.create_rectangle(x1, y1, x2, y2, fill=room_color, width=2, outline="black", tags=("box",
                                                                                                         f"room_index:{room_index}",
                                                                                                         f"room_type:{room_type}"))
         room_map[item_id] = box
@@ -486,7 +491,9 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
             new_index = room_index
             new_index_for_label = new_index + list(reorganized_json["rooms"])[-1]
         room_type = int(room_or_door_type)
-        box_id = canvas.create_rectangle(x1, y1, x2, y2, fill="white", width=2, outline="black", 
+        room_color = room_id_to_color(room_type)
+  
+        box_id = canvas.create_rectangle(x1, y1, x2, y2, fill=room_color, width=2, outline="black", 
                                          tags=("box", "random_box"
                                             f"room_index:{room_index}",
                                             f"room_type:{room_type}"))
@@ -694,8 +701,9 @@ def add_random_room():
     random_box = [400,90,450,130]
 
     room_index = get_last_room_index()
-
-    room_type = int(room_type_sv.get())
+    room_type = room_name_to_id(room_type_sv.get())
+    
+    #room_type = int(room_type_sv.get())
     room_indexes = neigh_room_indexes_sv.get().split(",")
     room_types = neigh_room_types_sv.get().split(",")
     door_indexes = neigh_door_indexes_sv.get().split(",")

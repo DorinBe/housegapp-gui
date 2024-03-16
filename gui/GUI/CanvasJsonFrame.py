@@ -1,6 +1,7 @@
 from tkinter import ttk
-from tkinter.ttk import Button, Label, Entry
+from tkinter.ttk import Button, Label, Entry, Combobox
 import ParseNewJson.edit_json_gui as ejg
+
 
 class CreateCanvasJsonFrame(ttk.Frame):
     def __init__(self, parent):
@@ -13,10 +14,23 @@ class CreateCanvasJsonFrame(ttk.Frame):
         Button(text="Add Vertical Door", master=self, command=lambda: ejg.add_random_door("vertical"))\
             .grid(row=0, column=2, sticky='w')
         
+        Combobox(master=self, textvariable=ejg.room_type_sv, state= "readonly",
+                  values = ["Living Room",
+                            "Kitchen",
+                            "Bedroom",
+                            "Bathroom",
+                            "Balcony",
+                            "Entrance",
+                            "Dining Room",
+                            "Study Room",
+                            "Storage",
+                            "Front Door",
+                            "Interior Door"])\
+            .grid(row=1, column=1, sticky="w")
         Label(text="Room Type:", master=self, )\
             .grid(row=1, column=0, sticky="w")
-        Entry(master = self, width=10, textvariable=ejg.room_type_sv)\
-            .grid(row=1, column=1, sticky='w')
+        # Entry(master = self, width=10, textvariable=ejg.room_type_sv)\
+        #     .grid(row=1, column=1, sticky='w')
         
         Label(text="Neigbor Room Indexes:", master=self, )\
             .grid(row=2, column=0, sticky="w")
