@@ -1,25 +1,11 @@
-import math
-import time
 import tkinter as tk
-from threading import Thread
 from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename
-from tkinter.scrolledtext import ScrolledText
-from tkinter.ttk import Entry
-from PIL import ImageTk
-from PIL import Image
-
-import matplotlib.backends.backend_tkagg as tkagg
+from PIL import ImageTk, Image
 import pyautogui as pg
-from matplotlib import pyplot as plt
-
-from GUI import AppWidgets, MainFrame
+from GUI import AppWidgets, MainFrame, CanvasOptionsFrame as COF, CanvasJsonFrame as CJF
 from GUI.AppWidgets import MyFrame
 from GUI.Styles import MyStyle
-
-import ctypes
-import threading
-
 import json
 from ParseNewJson import edit_json, edit_json_gui
 
@@ -86,48 +72,17 @@ class StartGUI(ttk.Frame):
         # clear graphs and notebooks data
         self.notebook_plots = self.notebook_plots.destroy()
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
+        self.main_frame.right_frame.columnconfigure(2, weight=1)
 
         if extension == "json":
             with open(self.path) as file:
                 original_data = json.load(file)
-
-            # new
             reorganized_json = edit_json.reorganize_json(original_data)
-            edit_json_gui.init_gui(self.main_frame, MAX_X, MAX_Y, original_data, reorganized_json, self.root, "init")
-
-            # buttons
-            self.save_new_json = ttk.Button(self.main_frame.right_frame, text="Save new Json", command=lambda: edit_json_gui.on_close(original_data, file_path_name, self.main_frame.message_label_middle, self.root, reorganized_json))
-            self.edge_selection = ttk.Button(self.main_frame.right_frame, text="Edge selection", command=lambda: edit_json_gui.draw_edges(reorganized_json, self.root))
-            self.room_selection = ttk.Button(self.main_frame.right_frame, text="Room selection", command=lambda: edit_json_gui.draw_boxes(reorganized_json, self.root))
-            self.clear = ttk.Button(self.main_frame.right_frame, text="Clear", command=lambda: edit_json_gui.on_clear(self.main_frame))
-            
-            self.room_type_entry = ttk.Entry(self.main_frame.right_frame, width=10, text="Room Type", textvariable=edit_json_gui.room_type_sv)
-            self.edges_neighbour_room_types = ttk.Entry(self.main_frame.right_frame, width=10, textvariable=edit_json_gui.edges_neighbour_room_types_sv)
-            self.edges_neighbour_room_indexes = ttk.Entry(self.main_frame.right_frame, width=10, textvariable=edit_json_gui.edges_neighbour_room_indexes_sv)
-            self.add_room_btn = ttk.Button(self.main_frame.right_frame, text="Add Room", 
-                                            command=lambda: edit_json_gui.add_random_room())
-            self.add_door_btn = ttk.Button(self.main_frame.right_frame, text="Add Door", 
-                                                        command=lambda: edit_json_gui.add_random_door())
-            self.move_edges_and_boxes_together = ttk.Button(self.main_frame.right_frame, text="Move edges and boxes together",
-                                                            command=lambda: edit_json_gui.move_edges_and_boxes_together())
-            
-
-            
-            # grid
-            self.save_new_json.grid(row=0, column=1, sticky="w")
-            self.clear.grid(row=1, column=1, sticky="w")
-            self.save_new_json.grid(row=0, column=1, sticky="w")
-            self.edge_selection.grid(row=2, column=1, sticky="w")
-            self.room_selection.grid(row=3, column=1, sticky="w")
-            self.add_room_btn.grid(row=4, column=1, sticky="w")
-            self.add_door_btn.grid(row=5, column=1, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="Room Type:").grid(row=6, column=1, sticky="w")
-            self.room_type_entry.grid(row=6, column=2, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="types of neigbour edges (if no neighbour, type 0)").grid(row=7, column=1, sticky="w")
-            self.edges_neighbour_room_types.grid(row=7, column=2, sticky="w")
-            ttk.Label(self.main_frame.right_frame, text="indexes of neigbour edges (if no neighbour, type N)").grid(row=8, column=1, sticky="w")
-            self.edges_neighbour_room_indexes.grid(row=8, column=2, sticky="w")
-            self.move_edges_and_boxes_together.grid(row=9, column=1, sticky="w")
+            edit_json_gui.init_gui(self.main_frame, MAX_X, MAX_Y, reorganized_json, self.root, "init")
+            COF.CreateCanvasOptionsFrame(self.main_frame.right_frame, original_data, file_path_name, reorganized_json, self.main_frame, self.root)\
+                .grid(row=0, column=2, sticky='nw')
+            CJF.CreateCanvasJsonFrame(self.main_frame.right_frame)\
+                .grid(row=1, column=0, sticky='nw')
 
         # elif extensions of images
         elif extension == "png" or extension == "jpg" or extension == "jpeg":
