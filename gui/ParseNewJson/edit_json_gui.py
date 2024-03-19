@@ -210,7 +210,7 @@ def on_mouse_down(event):
     try:
         x1, y1, x2, y2 = canvas.coords(current_rectangle)
     except:
-        print(f"{RED}Error in on_mouse_down:current_rectangle: {current_rectangle}{RESET}")
+        print(f"{g.RED}Error in on_mouse_down:current_rectangle: {current_rectangle}{g.RESET}")
     edge_margin = 5  # pixels
 
     on_left_edge = abs(x1 - event.x) < edge_margin
@@ -272,7 +272,6 @@ def on_mouse_move(event):
         canvas.coords(current_rectangle, x1, y1, x2, y2)
 
     start_x, start_y = event.x, event.y
-
     return dx,dy
 
 def update_new_coords():
@@ -356,11 +355,19 @@ def start_drag(event):
         drag_mode = is_close_to_endpoint(start_x, start_y, line_coords)
 
 def drag(event, _dx=None,_dy=None):
-    global start_x, start_y, current_edge, drag_mode
+    global start_x, start_y, current_edge, drag_mode, current_rectangle
     global room_index_together, room_edge_selection, canvas
 
     if room_edge_selection:
         canvas.move(f"edge_room_index:{room_index_together}", _dx, _dy)
+
+        if action_type == "resize":
+            current_rectangle_coords = canvas.coords(current_rectangle)
+            edges = canvas.find_withtag(f"edge_room_index:{room_index_together}")
+            canvas.coords(edges[0], current_rectangle_coords[0], current_rectangle_coords[1], current_rectangle_coords[0], current_rectangle_coords[3])
+            canvas.coords(edges[1], current_rectangle_coords[0], current_rectangle_coords[1], current_rectangle_coords[2], current_rectangle_coords[1])
+            canvas.coords(edges[2], current_rectangle_coords[2], current_rectangle_coords[1], current_rectangle_coords[2], current_rectangle_coords[3])
+            canvas.coords(edges[3], current_rectangle_coords[2], current_rectangle_coords[1], current_rectangle_coords[0], current_rectangle_coords[1])
 
     if current_edge:
         dx = event.x - start_x
@@ -518,10 +525,10 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
         room_color = room_id_to_color(room_type)
   
         box_id = canvas.create_rectangle(x1, y1, x2, y2, fill=room_color, width=2, outline="black", 
-                                         tags=("box", 
-                                            f"room_index:{room_index}",
-                                            f"room_type:{room_type}",
-                                            "random_box"))
+                                                                                    tags=(f"box", 
+                                                                                        f"room_index:{room_index}",
+                                                                                        f"room_type:{room_type}",
+                                                                                        f"random_box"))
         reorganized_json["room_types"].insert(new_index, room_type)
 
         room_map[box_id] = random_box #TODO is it also for doors? 
@@ -771,7 +778,6 @@ def on_mouse_down_together(event):
     on_mouse_down(event)
 
 def on_mouse_move_together(event):
-    global room_index_together
     dx,dy = on_mouse_move(event)
     drag(event,dx,dy)
 
