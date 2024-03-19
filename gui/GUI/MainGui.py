@@ -3,7 +3,7 @@ from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename
 from PIL import ImageTk, Image
 import pyautogui as pg
-from GUI import AppWidgets, MainFrame, CanvasOptionsFrame as COF, CanvasJsonFrame as CJF
+from GUI import AppWidgets, CanvasLegendFrame, MainFrame, CanvasOptionsFrame as COF, CanvasJsonFrame as CJF, CanvasLegendFrame as CLF
 from GUI.AppWidgets import MyFrame
 from GUI.Styles import MyStyle
 import json
@@ -80,9 +80,12 @@ class StartGUI(ttk.Frame):
             reorganized_json = edit_json.reorganize_json(original_data)
             edit_json_gui.init_gui(self.main_frame, MAX_X, MAX_Y, reorganized_json, self.root, "init")
             COF.CreateCanvasOptionsFrame(self.main_frame.right_frame, original_data, file_path_name, reorganized_json, self.main_frame, self.root)\
-                .grid(row=0, column=2, sticky='nw')
+                .grid(row=0, column=3, sticky='nw')
             CJF.CreateCanvasJsonFrame(self.main_frame.right_frame)\
                 .grid(row=1, column=0, sticky='nw')
+            CLF.CreateCanvasLegendFrame(self.main_frame.right_frame)\
+                .grid(row=0, column=2, sticky='nw')
+            
 
         # elif extensions of images
         elif extension == "png" or extension == "jpg" or extension == "jpeg":

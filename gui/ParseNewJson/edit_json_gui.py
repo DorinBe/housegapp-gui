@@ -44,6 +44,15 @@ selected_type_sv   = StringVar
 MAX_X = 0
 MAX_Y = 0
 
+def zoom(event):
+    scale = 1.0
+    # Respond to Linux or Windows mouse wheel
+    if event.num == 5 or event.delta == -120:
+        scale /= 2
+    if event.num == 4 or event.delta == 120:
+        scale *= 2
+    canvas.scale(tkinter.ALL, event.x, event.y, scale, scale)
+
 def init_gui(main_frame, width, height, _reorganized_json, _root, command:str):
     """originally added for implementing the is_inner_room feature to train model to output inner rooms"""
 
@@ -51,12 +60,13 @@ def init_gui(main_frame, width, height, _reorganized_json, _root, command:str):
     global room_type_sv, neigh_room_types_sv, neigh_room_indexes_sv, neigh_door_indexes_sv, neigh_door_types_sv
     global selected_index_sv, selected_type_sv, root
 
-    MAX_X = width-300
+    MAX_X = width-500
     MAX_Y = height-100
     reorganized_json = _reorganized_json
     root = _root
     canvas = tkinter.Canvas(main_frame.right_frame, width=MAX_X, height=MAX_Y, bg="white")
     canvas.grid(row=0, column=0, sticky="nswe")
+    canvas.bind("<MouseWheel>", zoom)  # for Windows
 
     if command != "clear":
         room_type_sv = tkinter.StringVar()  
