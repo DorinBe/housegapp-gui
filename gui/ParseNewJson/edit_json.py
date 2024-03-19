@@ -66,7 +66,7 @@ def find_edge_in_boxes(edge, boxes):
             return box
     return None
 
-def calculate_averge_of_box(box):
+def calculate_average_of_box(box):
     """Calculate the average of a box"""
     x_min, y_min, x_max, y_max = box
     return (x_min + x_max) / 2, (y_min + y_max) / 2

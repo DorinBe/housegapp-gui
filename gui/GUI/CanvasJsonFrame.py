@@ -32,32 +32,32 @@ class CreateCanvasJsonFrame(ttk.Frame):
         # Entry(master = self, width=10, textvariable=ejg.room_type_sv)\
         #     .grid(row=1, column=1, sticky='w')
         
-        Label(text="Neigbor Room Indexes:", master=self, )\
+        Label(text="Neighbor Room Indexes:", master=self, )\
             .grid(row=2, column=0, sticky="w")
         Entry(master = self, width=10, textvariable=ejg.neigh_room_indexes_sv)\
             .grid(row=2, column= 1, sticky='w')
         
-        Label(text="Neigbor Room Types:", master=self, )\
+        Label(text="Neighbor Room Types:", master=self, )\
             .grid(row=3, column=0, sticky="w")
         Entry(master = self, width=10, textvariable=ejg.neigh_room_types_sv)\
             .grid(row=3, column= 1, sticky='w')
         
-        Label(text="Neigbor Door Indexes:", master=self, )\
+        Label(text="Neighbor Door Indexes:", master=self, )\
             .grid(row=4, column=0, sticky="w")
         Entry(master = self, width=10, textvariable=ejg.neigh_door_indexes_sv)\
             .grid(row=4, column= 1, sticky='w')
         
-        Label(text="Neigbor Door Types:", master=self)\
+        Label(text="Neighbor Door Types:", master=self)\
             .grid(row=5, column=0, sticky="w")
         Entry(master = self, width=10, textvariable=ejg.neigh_door_types_sv)\
             .grid(row=5, column= 1, sticky='w')
         
-        Label(text="Selected edge is in room: ", master=self)\
+        Label(text="Selected index: ", master=self)\
             .grid(row=6, column=0)
-        Label(textvariable=ejg.selected_edge, master=self)\
+        Label(textvariable=ejg.selected_index_sv, master=self)\
             .grid(row=6, column=1, sticky='w')
         
-        Label(text="Selected box: ", master=self)\
+        Label(text="Selected type: ", master=self)\
             .grid(row=7, column=0)
-        Label(textvariable=ejg.selected_box, master=self)\
+        Label(textvariable=ejg.selected_type_sv, master=self)\
             .grid(row=7, column=1, sticky='w')

@@ -1,3 +1,11 @@
+# ANSI escape codes
+RED = '\033[31m'  # Red text
+GREEN = '\033[32m'  # Green text
+BLUE = '\033[34m'  # Blue text
+YELLOW = '\033[33m'  # Yellow text
+RESET = '\033[0m'  # Reset to default color
+DEBUG = True
+
 ROOM_TYPES = {
     "Living Room" : 1,
     "Kitchen" : 2,
@@ -40,3 +48,11 @@ def room_id_to_color(id: int) -> str:
         room_color = '#785A67' #Unknown
     
     return room_color
+
+def room_id_to_name(id: int) -> str:
+    if type(id) != int:
+        id = int(id)
+    for name, room_id in ROOM_TYPES.items():
+        if room_id == id:
+            return name
+    return "Unknown"

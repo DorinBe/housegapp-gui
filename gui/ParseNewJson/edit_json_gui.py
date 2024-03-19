@@ -1,29 +1,30 @@
 from functools import partial
 import tkinter
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk, messagebox, StringVar
 from ParseNewJson import edit_json
 import json
 import traceback
 from globals import room_id_to_color, room_name_to_id
-
-# ANSI escape codes
-RED = '\033[31m'  # Red text
-GREEN = '\033[32m'  # Green text
-BLUE = '\033[34m'  # Blue text
-YELLOW = '\033[33m'  # Yellow text
-RESET = '\033[0m'  # Reset to default color
-DEBUG = True
+import globals as g 
 
 # ************** Variables that should be cleared when clear is clicked  ************** #
 room_map = {}
 edge_map = {}
 ed_rm_list = []
 reorganized_json={}
+
 edge_selection = False
+current_edge = None
+
 room_selection = False
+current_rectangle = None
+
 room_edge_selection = False
-start_x = start_y = current_edge = current_rectangle = room_index_together = None
+room_index_together = None 
+"""room_index_together specifies selected index when using 'room_edge_selection' mode """
+
+start_x = None
+start_y = None
 drag_mode = None  # 'first', 'second', or None
 root=0
 canvas =  tkinter.Canvas
@@ -31,12 +32,14 @@ combobox = tkinter.ttk.Combobox
 
 # ************** Globals  ************** #
 units = 1  # pixels
-selected_edge = selected_box = selected_door= tkinter.StringVar
-room_type_sv = tkinter.StringVar
-neigh_room_indexes_sv = tkinter.StringVar
-neigh_room_types_sv = tkinter.StringVar
-neigh_door_indexes_sv = tkinter.StringVar
-neigh_door_types_sv = tkinter.StringVar
+
+room_type_sv    = StringVar
+neigh_room_indexes_sv   = StringVar
+neigh_room_types_sv     = StringVar
+neigh_door_indexes_sv   = StringVar
+neigh_door_types_sv     = StringVar
+selected_index_sv  = StringVar
+selected_type_sv   = StringVar
 
 MAX_X = 0
 MAX_Y = 0
@@ -46,6 +49,8 @@ def init_gui(main_frame, width, height, _reorganized_json, _root, command:str):
 
     global canvas, combobox, MAX_X, MAX_Y, reorganized_json,selected_edge
     global room_type_sv, neigh_room_types_sv, neigh_room_indexes_sv, neigh_door_indexes_sv, neigh_door_types_sv
+    global selected_index_sv, selected_type_sv, root
+
     MAX_X = width-300
     MAX_Y = height-100
     reorganized_json = _reorganized_json
@@ -60,24 +65,18 @@ def init_gui(main_frame, width, height, _reorganized_json, _root, command:str):
         neigh_room_indexes_sv = tkinter.StringVar()
         neigh_door_types_sv = tkinter.StringVar()
         selected_edge = tkinter.StringVar()
-        selected_box = tkinter.StringVar()
-        selected_door = tkinter.StringVar()
+        selected_index_sv = tkinter.StringVar()
+        selected_type_sv = tkinter.StringVar()
+
         draw_boxes(reorganized_json, root)
         draw_edges(reorganized_json, root)
         # reorganized_json = edit_json.add_is_inner_room(reorganized_json)
-    canvas.bind("<1>", on_canvas_click)
 
 def on_combo_change(event):
     global reorganized_json, canvas
 
     val = combobox.get()
     reorganized_json["rooms"][int(selected_edge.get())]["is_inner_room"] = val
-
-def on_canvas_click(event):
-    print("Canvas clicked at", event.x, event.y)
-    # item_id = canvas.find_closest(event.x,event.y)
-    # canvas.find_withtag()
-    event.widget.focus_set()  # Set focus to the canvas when it's clicked
 
 def draw_boxes(data, _root):
     global edge_selection, room_selection, root, room_edge_selection, room_index_together, canvas
@@ -94,7 +93,6 @@ def draw_boxes(data, _root):
         canvas.tag_raise("label")
         canvas.tag_lower("edge")
 
-        canvas.bind("<1>", on_canvas_click)
         canvas.bind("<Button-1>", partial(on_mouse_down))
         canvas.bind("<B1-Motion>", partial(on_mouse_move))
         canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
@@ -111,7 +109,7 @@ def draw_boxes(data, _root):
                                                                                                         f"room_index:{room_index}",
                                                                                                         f"room_type:{room_type}"))
         room_map[item_id] = box
-        x, y = edit_json.calculate_averge_of_box(box)
+        x, y = edit_json.calculate_average_of_box(box)
         label_id = canvas.create_text(x, y, text=f"{room_index}", font=("Arial", 8), tags=("label",
                                                                                             f"label_room_index:{room_index}",
                                                                                             f"label_room_type:{room_type}",
@@ -119,7 +117,6 @@ def draw_boxes(data, _root):
         canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
         
     
-    canvas.bind("<1>", on_canvas_click)
     canvas.bind("<Button-1>", partial(on_mouse_down))
     canvas.bind("<B1-Motion>", partial(on_mouse_move))
     canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
@@ -153,10 +150,11 @@ def draw_edges(data, _root):
         is_door = True if room_type > 11 else False
         for index_in_edge_list,edge in enumerate(edges):
             try:
-                x1, y1, x2, y2, room_type, neighbour_room = edge
+                x1, y1, x2, y2, room_type, neighbor_room = edge
                 item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge",
                                                                                           f"edge_room_index:{room_index}",
-                                                                                          f"edge_is_door:{is_door}"))
+                                                                                          f"edge_is_door:{is_door}",
+                                                                                          f"edge_room_type:{room_type}",))
                 edge_map[item_id] = edge                    
             except Exception as e:
                 traceback.format_exc(e)
@@ -167,35 +165,42 @@ def draw_edges(data, _root):
 
 def on_mouse_down(event):
     global current_rectangle, action_type, start_x, start_y, resize_edge, canvas
-    global room_index_together, room_edge_selection
+    global room_index_together, room_edge_selection, selected_index_sv, selected_type_sv
 
     item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
     if "box" in tags:
         current_rectangle = item
         room_index = tags[1].split(":")[1]
+        room_type = tags[2].split(":")[1]
+        selected_index_sv.set(room_index)
+        selected_type_sv.set(room_type+g.room_id_to_name(room_type))
         if room_edge_selection == True:
             room_index_together = int(room_index)
             canvas.itemconfigure("edge", width=0.5, fill="black")
             canvas.itemconfigure("box", width=2, outline="black")
             canvas.itemconfig(current_rectangle, outline="green")
             canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
+
     elif "edge" in tags:
         is_door = bool(tags[3].split(":")[-1])
         if is_door == True:
             room_index = tags[1].split(":")[-1]
-            current_rectangle = canvas.find_withtag(f"room_index:{room_index}")
+            room_type = tags[3].split(":")[1]
+            current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
             room_index_together = int(room_index)
             canvas.itemconfigure("edge", width=0.5, fill="black")
             canvas.itemconfigure("box", width=2, outline="black")
             canvas.itemconfig(current_rectangle, outline="green")
             canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
+            selected_index_sv.set(value=room_index)
+            selected_type_sv.set(value=room_type+g.room_id_to_name(room_type))
 
     start_x, start_y = event.x, event.y
     try:
         x1, y1, x2, y2 = canvas.coords(current_rectangle)
     except:
-        print(f"{RED}Error in on_mouse_down:current_rectangle: {current_rectangle}")
+        print(f"{RED}Error in on_mouse_down:current_rectangle: {current_rectangle}{RESET}")
     edge_margin = 5  # pixels
 
     on_left_edge = abs(x1 - event.x) < edge_margin
@@ -303,6 +308,8 @@ def on_mouse_up(event):
             reorganized_json[rooms_or_doors][room_index]["boxes"] = new_coords
 
         if room_edge_selection:
+            room_type = int(tags[2].split(":")[1])
+            rooms_or_doors = "doors" if room_type > 11 else "rooms"
             update_edges_coords = canvas.find_withtag(f"edge_room_index:{room_index_together}")
             for i, edge in enumerate(update_edges_coords):
                 new_coords = canvas.coords(edge)
@@ -315,7 +322,6 @@ def start_drag(event):
     global start_x, start_y, current_edge, drag_mode, selected_edge, canvas
      
     item = canvas.find_closest(event.x, event.y)[0]  # Find the closest item to the click
-    print(f"closeset item: {item}")
     tags = canvas.gettags(item)
     if "edge" in tags:
         start_x, start_y = event.x, event.y
@@ -323,7 +329,15 @@ def start_drag(event):
         for tag in tags:
             if "room_index" in tag:
                 room_index = tag.split(":")[-1]
-                selected_edge.set(room_index)
+                selected_edge.set(room_index)                
+                selected_index_sv.set(value=room_index)
+                selected_type_sv.set(value=tags[3].split(":")[1]+" "+g.room_id_to_name(tags[3].split(":")[1]))
+            if "edge_room_index" in tag:
+                selected_index_sv.set(value=room_index)
+                selected_type_sv.set(value=tags[3].split(":")[1]+" "+g.room_id_to_name(tags[3].split(":")[1]))
+            if "room_type" in tag:
+                room_type = tag.split(":")[-1]
+                selected_type_sv.set(value=room_type)
                 break
 
         canvas.itemconfig(current_edge, fill="green", width=2)
@@ -368,7 +382,7 @@ def end_drag(event):
                     for _tag in tags:
                         if "edge_index" in _tag:
                             edge_index = int(_tag.split("=")[-1])
-                            # update edges directly to the reorganized_json no need to concate newdata to originaldata
+                            # update edges directly to the reorganized_json no need to concat newdata to originaldata
                             reorganized_json["rooms"][room_index]["edges"][edge_index][:4] = new_coords
                     break
 
@@ -386,7 +400,7 @@ def dump_boxes(path, fixed_json):
     return "File saved as " + path
 
 def output_newdata_to_original_format_with_is_inner_room(data, _root, reorganized_json):
-    new_data = concate_newdata_to_originaldata(data, _root)
+    new_data = concat_newdata_to_originaldata(data, _root)
     new_data["is_inner_room"] = []
     # new_data["is_inner_room"] = reorganized_json["is_inner_room"]
 
@@ -396,7 +410,7 @@ def output_newdata_to_original_format_with_is_inner_room(data, _root, reorganize
 
     return new_data
 
-def concate_newdata_to_originaldata(data, _root):
+def concat_newdata_to_originaldata(data, _root):
     """ Input: original data in original format
         Output: updated data in original format """
     newdata = { "room_type": [], "boxes": [], "edges":[], "ed_rm":[]}
@@ -433,8 +447,8 @@ def validate_data(reorganized_json):
 def on_close(originaldata, path, message_label_middle, root, reorganized_data):
     """input: original data format {"room_type"=[3,3,1,...], 
                                     "boxes"=[[58.0, 78.0, 130.0, 122.0],...], 
-                                    "edges"=[[58.0, 122.0, 130.0, 122.0, 3, 1],...], # where 3 is current room_type and 1 is neighbour_room_type
-                                    "ed_rm"=[[0], [0, 2],....]} # where 0 is corresponding room_index and 2 is neighbour_index
+                                    "edges"=[[58.0, 122.0, 130.0, 122.0, 3, 1],...], # where 3 is current room_type and 1 is neighbor_room_type
+                                    "ed_rm"=[[0], [0, 2],....]} # where 0 is corresponding room_index and 2 is neighbor_index
     """
     global reorganized_json
     # check all items on canvas 
@@ -444,7 +458,7 @@ def on_close(originaldata, path, message_label_middle, root, reorganized_data):
         draw_boxes(reorganized_data, root)
 
     """already updated reorganized_json with the new data in previous stages (end_drag, on_mouse_up)"""
-    # newdata = concate_newdata_to_originaldata(originaldata, root)
+    # newdata = concat_newdata_to_originaldata(originaldata, root)
     # reorganized_json = edit_json.reorganize_json(reorganized_json)
     original_format_json = edit_json.deorganize_format(reorganized_json)
     new_path = dump_boxes(path, original_format_json)
@@ -494,13 +508,14 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
         room_color = room_id_to_color(room_type)
   
         box_id = canvas.create_rectangle(x1, y1, x2, y2, fill=room_color, width=2, outline="black", 
-                                         tags=("box", "random_box"
+                                         tags=("box", 
                                             f"room_index:{room_index}",
-                                            f"room_type:{room_type}"))
+                                            f"room_type:{room_type}",
+                                            "random_box"))
         reorganized_json["room_types"].insert(new_index, room_type)
 
         room_map[box_id] = random_box #TODO is it also for doors? 
-        x, y = edit_json.calculate_averge_of_box(random_box)
+        x, y = edit_json.calculate_average_of_box(random_box)
         label_id=canvas.create_text(x, y, text=f"{new_index}", font=("Arial", 8), tags=("label",
                                                                                         "random-label",
                                                                                         f"label_room_index:{new_index}",
@@ -508,7 +523,6 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
                                                                                         f"label_item_id:{box_id}"))
         canvas.tag_unbind(label_id, '<Button-1>')  # Unbind left mouse click events from the item
     
-        canvas.bind("<1>", on_canvas_click)
         canvas.bind("<Button-1>", partial(on_mouse_down))
         canvas.bind("<B1-Motion>", partial(on_mouse_move))
         canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
@@ -517,12 +531,12 @@ def add_box_random(random_box, room_or_door_type, room_or_door:str, room_index):
 def add_edge_random(random_edges,room_index, rooms_or_doors):
     global canvas, reorganized_json, edge_map
     for edge in random_edges:
-        x1, y1, x2, y2, room_type, neighbour_room = edge
+        x1, y1, x2, y2, room_type, neighbor_room = edge
         is_door = True if room_type > 11 else False
         item_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge", 
-                                                                                  "random_edge",
                                                                                     f"edge_room_index:{room_index}",
-                                                                                    f"edge_is_door:{is_door}"))
+                                                                                    f"edge_is_door:{is_door}",
+                                                                                    "random_edge",))
         edge_map[item_id] = edge
         reorganized_json[rooms_or_doors][room_index]["edges"].append(edge)
 
@@ -583,9 +597,9 @@ def find_dir(index):
 
 def update_edges_and_ed_rm_to_add_random_room(room_index, room_type, room_types, room_indexes, door_indexes, door_types):
     """Update ed_rm and edges according to user's input when adding a new room.
-    This algorithm actually works if the neighbours are doors or rooms because only neighbours are being updated.
-    so if a door neighbour is updated, then the door's neighbour will be a room V
-    and if a room neighbour is updates, then the room's neighbour will be a room V
+    This algorithm actually works if the neighbors are doors or rooms because only neighbors are being updated.
+    so if a door neighbor is updated, then the door's neighbor will be a room V
+    and if a room neighbor is updates, then the room's neighbor will be a room V
     function is not changed for an addition of a room. pretty tricky concept."""
     global reorganized_json
 
@@ -609,34 +623,35 @@ def update_edges_and_ed_rm_to_add_random_room(room_index, room_type, room_types,
         reorganized_json["doors"][index]["ed_rm"][dir] = [index, room_index]
         reorganized_json["doors"][index]["edges"][dir][5] = room_type 
 
-def append_ed_rm_list(room_index, neighbour_room_indexes):
+def append_ed_rm_list(room_index, neigh_room_indexes):
     res = []
 
-    for i, neigh_index in enumerate(neighbour_room_indexes):
-        if neigh_index == 'N':
+    for i, neigh_index in enumerate(neigh_room_indexes):
+        if neigh_index == 'N' or neigh_index == 'n':
             res.append([int(room_index)])
         else:
             res.append([room_index, int(neigh_index)])
     return res
 
-def if_neighbour_doors_increment_their_index(neighbour_types, neighbour_edges):
-    for i, _type in enumerate(neighbour_types):
+def if_neighbor_doors_increment_their_index(neigh_types, neigh_edges):
+    for i, _type in enumerate(neigh_types):
         if _type is None:
             continue
         _type = int(_type)
         if _type > 10: # is room
-            neighbour_types[i] = neighbour_types[i]+1
-            neighbour_edges[i] = neighbour_edges[i]+1
+            neigh_types[i] = neigh_types[i]+1
+            neigh_edges[i] = neigh_edges[i]+1
 
 def add_random_door(direction):
     global ed_rm_list, room_type_sv
 
     try:
-        door_type = int(room_type_sv.get())
+        
+        door_type = room_name_to_id(room_type_sv.get())
         room_indexes = neigh_room_indexes_sv.get().split(",")
         room_types = neigh_room_types_sv.get().split(",")
-    except:
-        pass
+    except Exception as e:
+        traceback.format_exc(e)
 
     x_threshold = 7
     y_threshold = 2
@@ -660,7 +675,7 @@ def add_random_door(direction):
                         [rd[2],rd[1],rd[0],rd[1],door_type, int(room_types[3])]]
 
     # a door's index is num of rooms+doors+1
-    # but at the end, a new order is formed so in the begining "doors" starts from key 1
+    # but at the end, a new order is formed so in the beginning "doors" starts from key 1
     if list(reorganized_json["doors"]) == []:
         door_index = 1
     else:
@@ -785,7 +800,6 @@ def move_right(event):
 def move_edges_and_boxes_together():
     global room_edge_selection, canvas
     room_edge_selection = True
-    canvas.bind("<1>", on_canvas_click)
     canvas.bind("<Button-1>", partial(on_mouse_down_together))
     canvas.bind("<B1-Motion>", partial(on_mouse_move_together))
     canvas.bind("<ButtonRelease-1>", partial(on_mouse_up_together))
