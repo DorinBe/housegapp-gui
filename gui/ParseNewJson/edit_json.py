@@ -1,3 +1,7 @@
+from datetime import datetime
+import json
+import traceback
+
 def add_is_inner_room(reorganized_json) -> dict:
     for room in reorganized_json["rooms"].values():
         room["is_inner_room"] = False
@@ -21,7 +25,7 @@ def fix_difference_between_edge_to_box(edge, box):
     ex1, ey1, ex2, ey2 = edge[:4]
     bx1, by1, bx2, by2 = box
     room_index = edge[4]
-    room_neighbour_index = edge[5]
+    room_neighbor_index = edge[5]
 
     # replace edges
     if ex1>ex2:
@@ -37,16 +41,16 @@ def fix_difference_between_edge_to_box(edge, box):
         replacedY = True
 
     if ex1<bx1:
-        print(f"ex1 {ex1} < bx1 {bx1}, direfrencing to ex1=bx1 {bx1}")
+        print(f"ex1 {ex1} < bx1 {bx1}, differencing to ex1=bx1 {bx1}")
         ex1 = bx1
     if ex2>bx2:
-        print(f"ex2 {ex2} > bx2 {bx2}, direfrencing to ex2=bx2 {bx2}")
+        print(f"ex2 {ex2} > bx2 {bx2}, differencing to ex2=bx2 {bx2}")
         ex2 = bx2
     if ey1<by1:
-        print(f"ey1 {ey1} < by1 {by1}, direfrencing to ey1=by1 {by1}")
+        print(f"ey1 {ey1} < by1 {by1}, differencing to ey1=by1 {by1}")
         ey1 = by1
     if ey2>by2:
-        print(f"ey2 {ey2} > by2 {by2}, direfrencing to ey2=by2 {by2}")
+        print(f"ey2 {ey2} > by2 {by2}, differencing to ey2=by2 {by2}")
         ey2 = by2
 
     if replacedX:
@@ -58,7 +62,7 @@ def fix_difference_between_edge_to_box(edge, box):
         ey1 = ey2
         ey2 = temp
 
-    return ex1, ey1, ex2, ey2,room_index, room_neighbour_index
+    return ex1, ey1, ex2, ey2,room_index, room_neighbor_index
 
 def find_edge_in_boxes(edge, boxes):
     for box in boxes:
@@ -130,7 +134,7 @@ def reorganize_json(data):
     return new_json
 
 def deorganize_format(reorganized_json):
-    """ Input:  updated data in reogrganized format
+    """ Input:  updated data in reorganized format
         Output: updated data in original format"""
 
     original_json = {
@@ -162,3 +166,12 @@ def deorganize_format(reorganized_json):
         original_json["ed_rm"].extend(ed_rm)
         
     return original_json
+
+def dump_boxes(path, fixed_json):
+    try:
+        path = path + '_' + str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + '.json'
+        with open(path, 'a+') as file:
+            json.dump(fixed_json, file)
+    except Exception as e:
+        return traceback.format_exc(e)
+    return "File saved as " + path

@@ -78,8 +78,8 @@ class StartGUI(ttk.Frame):
             with open(self.path) as file:
                 original_data = json.load(file)
             reorganized_json = edit_json.reorganize_json(original_data)
-            edit_json_gui.init_gui(self.main_frame, MAX_X, MAX_Y, reorganized_json, self.root, "init")
-            COF.CreateCanvasOptionsFrame(self.main_frame.right_frame, original_data, file_path_name, reorganized_json, self.main_frame, self.root)\
+            edit_json_gui.init_gui(self.main_frame, MAX_X, MAX_Y, reorganized_json, "init")
+            COF.CreateCanvasOptionsFrame(self.main_frame.right_frame, file_path_name, reorganized_json, self.main_frame)\
                 .grid(row=0, column=3, sticky='nw')
             CJF.CreateCanvasJsonFrame(self.main_frame.right_frame)\
                 .grid(row=1, column=0, sticky='nw')
