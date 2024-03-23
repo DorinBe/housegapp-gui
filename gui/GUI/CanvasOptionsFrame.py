@@ -6,7 +6,7 @@ class CreateCanvasOptionsFrame(ttk.Frame):
     def __init__(self, parent,file_path_name,reorganized_json, main_frame):
         super().__init__(parent, style='Custom.TFrame')
         Button(self, text="Save new Json",
-                command=lambda: ejg.on_close(file_path_name, main_frame.message_label_middle, reorganized_json))\
+                command=lambda: ejg.on_close(file_path_name, main_frame.message_label_middle))\
                     .grid(row=0, column=2, sticky="nw")
         Button(self, text="Clear", command=lambda: ejg.on_clear(main_frame))\
                     .grid(row=1, column=2, sticky="nw")

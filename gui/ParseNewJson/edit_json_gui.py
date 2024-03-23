@@ -266,7 +266,10 @@ def draw_random_door(direction):
     # a door's index is num of rooms+doors+1
     # but at the end, a new order is formed so in the beginning "doors" starts from key 1
     if list(reorganized_json["doors"]) == []:
-        door_index = 1
+        if get_last_room_index() == 0:
+            door_index = 0
+        else:
+            door_index = 1
     else:
         door_index = list(reorganized_json["doors"])[-1]+1
     
@@ -367,7 +370,7 @@ def update_new_coords():
                 new_coords = canvas.coords(edge)
                 reorganized_json[rooms_or_doors][room_index_together]["edges"][i][:4] = new_coords
 
-def on_close(path, message_label_middle, reorganized_data):
+def on_close(path, message_label_middle):
     """input: original data format {"room_type"=[3,3,1,...], 
                                     "boxes"=[[58.0, 78.0, 130.0, 122.0],...], 
                                     "edges"=[[58.0, 122.0, 130.0, 122.0, 3, 1],...], # where 3 is current room_type and 1 is neighbor_room_type
@@ -375,17 +378,24 @@ def on_close(path, message_label_middle, reorganized_data):
     """
     global reorganized_json
     # check all items on canvas 
-    if not edge_map:
-        draw_edges(reorganized_data)
-    if not room_map:
-        draw_boxes(reorganized_data)
 
-    """already updated reorganized_json with the new data in previous stages (end_drag, on_mouse_up)"""
-    # newdata = concat_newdata_to_originaldata(originaldata)
-    # reorganized_json = edit_json.reorganize_json(reorganized_json)
-    original_format_json = edit_json.deorganize_format(reorganized_json)
-    new_path = edit_json.dump_boxes(path, original_format_json)
-    message_label_middle.config(text=new_path)
+    if len(reorganized_json["room_types"])!=0:
+        if not edge_map:
+            draw_edges(reorganized_json)
+        if not room_map:
+            draw_boxes(reorganized_json)
+
+        """already updated reorganized_json with the new data in previous stages (end_drag, on_mouse_up)"""
+        # newdata = concat_newdata_to_originaldata(originaldata)
+        # reorganized_json = edit_json.reorganize_json(reorganized_json)
+        original_format_json = edit_json.deorganize_format(reorganized_json)
+        new_path = edit_json.dump_boxes(path, original_format_json)
+        message_label_middle.config(text=new_path)
+    else:
+        original_format_json = {"room_type":[], "boxes":[], "edges":[], "ed_rm":[]}
+        new_path = edit_json.dump_boxes(path, original_format_json)
+        message_label_middle.config(text=new_path)
+
 
 def on_clear(main_frame):
     global edge_map, room_map, reorganized_json, edge_selection, room_selection, ed_rm_list

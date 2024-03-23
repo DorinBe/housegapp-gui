@@ -100,6 +100,10 @@ def reorganize_json(data):
     new_json = {"room_types": [],
                 "rooms": {},
                 "doors":{} }
+    
+    if len(original_room_types) == 0:
+        return new_json
+    
     from_edge_index, to_edge_index = 0,0
     prev_room_index, curr_room_index = 0,0
     new_json["room_types"].extend(original_room_types)
@@ -155,7 +159,7 @@ def deorganize_format(reorganized_json):
         original_json["edges"].extend(edges)
         original_json["ed_rm"].extend(ed_rm)
     
-    last_room_index = list(reorganized_json["rooms"])[-1]
+    # last_room_index = list(reorganized_json["rooms"])[-1]
     for door in reorganized_json["doors"].items():        
         edges = door[1]["edges"]
         boxes = door[1]["boxes"]
