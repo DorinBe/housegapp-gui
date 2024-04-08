@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk as ttk
 from GUI.Styles import PinkPallete as P
 from PIL import Image, ImageTk
-from Assets import assets
+from Assets.Photos import photos
 
 
 class CreateMainFrame(ttk.Frame):
@@ -12,14 +12,14 @@ class CreateMainFrame(ttk.Frame):
         self.parent = parent
 
         # photos
-        self.image_smting = Image.open(assets.house_logo)
+        self.image_smting = Image.open(photos.house_logo)
         self.image_smting.thumbnail((200, 200))
         self.image_smting = ImageTk.PhotoImage(self.image_smting)
 
-        self.background1_image  = Image.open(assets.bg1)
+        self.background1_image  = Image.open(photos.bg1)
         self.background1_image  = ImageTk.PhotoImage(self.background1_image)
 
-        self.background2_image  = Image.open(assets.bg2)
+        self.background2_image  = Image.open(photos.bg2)
         self.background2_image  = ImageTk.PhotoImage(self.background2_image)
 
         # frames
@@ -30,6 +30,7 @@ class CreateMainFrame(ttk.Frame):
         self.message_frame = tk.Frame(self.parent, bg=str(P.get(2)))
 
         # buttons
+        self.new_floorplan = ttk.Button(master=self.left_frame, text="New Floorplan", width=20, style='Pink.TButton')
         self.load_json_btn = ttk.Button(master=self.left_frame, text="Load JSON", width=20, style='Pink.TButton')
         self.stop_analyzing_btn = ttk.Button(master=self.left_frame,width=3, style='Stop.TButton')
         self.plots_radio = ttk.Radiobutton(self.left_frame, text='Rooms\t', width=10, style='Pink.TRadiobutton')
@@ -37,7 +38,7 @@ class CreateMainFrame(ttk.Frame):
         self.settings_btn = ttk.Button(self.left_frame, text='Settings', width=10, style="Pink.TButton")
         self.signin_btn = ttk.Button(self.left_frame, text='Sign in', width=10, style="Pink.TButton")
         self.train_model_btn = ttk.Button(self.left_frame, text='Train Model', width=10, style="Pink.TButton")
-        info_image = tk.PhotoImage(file=assets.info)
+        info_image = tk.PhotoImage(file=photos.info)
         self.info_btn = ttk.Button(self.left_frame, text='Info', width=10, style="Pink.TButton", image=info_image)
         
         self.path_label_left = tk.Label(self.path_frame, bg=str(P.get(2)), fg="black", text="", padx=10)
@@ -100,10 +101,12 @@ class CreateMainFrame(ttk.Frame):
         self.message_label_middle.grid(row=0, column=1, sticky="ew")
         self.message_label_right.grid(row=0, column=2, sticky='ew')
 
-        self.load_json_btn.grid(row=0, column=0, padx=5, pady=5)
-        self.stop_analyzing_btn.grid(row=0, column=1, padx=(0, 5))
-        self.plots_radio.grid(row=1, column=0, padx=5, pady=5)
-        self.download_btn.grid(row=3, column=0, padx=5, pady=5)
-        # self.settings_btn.grid(row=4, column=0, padx=5, pady=5)
-        self.signin_btn.grid(row=5, column=0, padx=5, pady=5)
-        # self.info_btn.grid(row=6, column=0, padx=5, pady=5)
+        def row_generator(start:int):
+            while True:
+                yield start
+                start+=1
+
+        row_i = row_generator(0)
+        self.new_floorplan.grid(row=next(row_i), column=0, padx=5, pady=5)
+        self.load_json_btn.grid(row=next(row_i), column=0, padx=5, pady=5)
+        self.download_btn.grid(row=next(row_i), column=0, padx=5, pady=5)

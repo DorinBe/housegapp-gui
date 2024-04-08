@@ -8,7 +8,9 @@ from GUI.AppWidgets import MyFrame
 from GUI.Styles import MyStyle
 import json
 from ParseNewJson import edit_json, edit_json_gui
-from Assets import assets
+from Assets.Photos import photos
+from Assets.Jsons import jsons
+from datetime import datetime
 
 
 MAX_X, MAX_Y = 1400, 800
@@ -23,7 +25,7 @@ class StartGUI(ttk.Frame):
         self.window = self.root = parent
         MyStyle()
         self.window.title(f"House-GAN++")  # title of the GUI window
-        self.window.iconbitmap((assets.house_icon))  # icon of the GUI window
+        self.window.iconbitmap((photos.house_icon))  # icon of the GUI window
         place_center(self.window, width=MAX_X, height=MAX_Y)
 
         self.path = ""
@@ -48,6 +50,8 @@ class StartGUI(ttk.Frame):
         # set functionalities to buttons
         self.main_frame.load_json_btn.configure(
             command=lambda: self.open_file(extension='json'))
+        self.main_frame.new_floorplan.configure(
+            command=lambda: self.open_file(extension='json', really_open=False))
         self.main_frame.plots_radio.configure(value=1, variable=self.selected, command=self.show_selected_size,
                                               state='disabled')
         self.main_frame.download_btn.configure(command=self.download, state='disabled')
@@ -60,14 +64,22 @@ class StartGUI(ttk.Frame):
         image = self.floor_plan_label['image'][0]
         image.save('floor_plan.png')
 
-    def open_file(self, extension):
+    def open_file(self, extension, really_open=True):
         self.selected.set(-1)
-        title = "Please choose " + extension + " file to work with"
-        self.path = askopenfilename(filetypes=[("Custom Files:", extension)], title=title)
-        self.main_frame.path_label_middle.configure(text="You selected "+self.path)
-        if not self.path:
-            print(f"Error opening file {self.path}")
-            return
+        if really_open:
+            title = "Please choose " + extension + " file to work with"
+            self.path = askopenfilename(filetypes=[("Custom Files:", extension)], title=title)
+            self.main_frame.path_label_middle.configure(text="You selected "+self.path)
+            if not self.path:
+                print(f"Error opening file {self.path}")
+                return
+        else:
+            import os
+            self.path = os.path.join(jsons.jsons_dir, str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + '.json')
+            self.main_frame.path_label_middle.configure(text="You selected "+self.path)
+            with open(self.path, 'w') as file: # force new json file with empty data
+                file.write('{"room_type": [], "boxes": [], "edges": [], "ed_rm": []}')
+
         file_path_name = self.path.split('.')[0]
         extension = self.path.split('.')[1]
 

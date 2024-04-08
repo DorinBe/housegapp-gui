@@ -163,3 +163,4 @@ GUI/__pycache__/
 Logic/__pycache__/
 *.csv
 *.json
+Asset/Jsons/*.json
