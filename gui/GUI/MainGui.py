@@ -8,6 +8,8 @@ from GUI.AppWidgets import MyFrame
 from GUI.Styles import MyStyle
 import json
 from ParseNewJson import edit_json, edit_json_gui
+from Assets import assets
+
 
 MAX_X, MAX_Y = 1400, 800
 
@@ -21,7 +23,7 @@ class StartGUI(ttk.Frame):
         self.window = self.root = parent
         MyStyle()
         self.window.title(f"House-GAN++")  # title of the GUI window
-        self.window.iconbitmap("house_icon-removebg-preview.ico")
+        self.window.iconbitmap((assets.house_icon))  # icon of the GUI window
         place_center(self.window, width=MAX_X, height=MAX_Y)
 
         self.path = ""

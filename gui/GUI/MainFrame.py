@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk as ttk
 from GUI.Styles import PinkPallete as P
 from PIL import Image, ImageTk
+from Assets import assets
 
 
 class CreateMainFrame(ttk.Frame):
@@ -11,14 +12,14 @@ class CreateMainFrame(ttk.Frame):
         self.parent = parent
 
         # photos
-        self.image_smting = Image.open('house_logo-removebg-preview.png')
+        self.image_smting = Image.open(assets.house_logo)
         self.image_smting.thumbnail((200, 200))
         self.image_smting = ImageTk.PhotoImage(self.image_smting)
 
-        self.background1_image  = Image.open('background1.1-removebg-preview.png')
+        self.background1_image  = Image.open(assets.bg1)
         self.background1_image  = ImageTk.PhotoImage(self.background1_image)
 
-        self.background2_image  = Image.open('background2.1-removebg-preview.png')
+        self.background2_image  = Image.open(assets.bg2)
         self.background2_image  = ImageTk.PhotoImage(self.background2_image)
 
         # frames
@@ -27,7 +28,6 @@ class CreateMainFrame(ttk.Frame):
         self.right_frame = tk.Frame(self.parent, bg="white")
         self.path_frame = tk.Frame(self.parent, bg=str(P.get(2)))
         self.message_frame = tk.Frame(self.parent, bg=str(P.get(2)))
-        # self.center_frame = tk.Frame(self.parent, bg=str(P.get(1)))
 
         # buttons
         self.load_json_btn = ttk.Button(master=self.left_frame, text="Load JSON", width=20, style='Pink.TButton')
@@ -37,7 +37,7 @@ class CreateMainFrame(ttk.Frame):
         self.settings_btn = ttk.Button(self.left_frame, text='Settings', width=10, style="Pink.TButton")
         self.signin_btn = ttk.Button(self.left_frame, text='Sign in', width=10, style="Pink.TButton")
         self.train_model_btn = ttk.Button(self.left_frame, text='Train Model', width=10, style="Pink.TButton")
-        info_image = tk.PhotoImage(file='info.png')
+        info_image = tk.PhotoImage(file=assets.info)
         self.info_btn = ttk.Button(self.left_frame, text='Info', width=10, style="Pink.TButton", image=info_image)
         
         self.path_label_left = tk.Label(self.path_frame, bg=str(P.get(2)), fg="black", text="", padx=10)

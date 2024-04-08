@@ -16,3 +16,5 @@ class CreateCanvasOptionsFrame(ttk.Frame):
                     .grid(row=3, column=2, sticky="nw")
         Button(self, text="Both Selection", command=lambda: ejg.move_edges_and_boxes_together())\
                     .grid(row=4, column=2, sticky='nw')
+        Button(self, text="Generate", command=lambda: ejg.move_edges_and_boxes_together())\
+                    .grid(row=4, column=2, sticky='nw')
