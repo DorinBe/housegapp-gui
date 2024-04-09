@@ -43,7 +43,7 @@ selected_type_sv   = StringVar
 MAX_X = 0
 MAX_Y = 0
 
-def init_gui(main_frame, width, height, _reorganized_json, command:str):
+def init_gui(edit_json_frame, width, height, _reorganized_json, command:str):
     """originally added for implementing the is_inner_room feature to train model to output inner rooms"""
 
     global canvas, combobox, MAX_X, MAX_Y, reorganized_json,selected_edge
@@ -54,7 +54,7 @@ def init_gui(main_frame, width, height, _reorganized_json, command:str):
     MAX_Y = height-100
     reorganized_json = _reorganized_json
 
-    canvas = tkinter.Canvas(main_frame.right_frame, width=MAX_X, height=MAX_Y, bg="white")
+    canvas = tkinter.Canvas(edit_json_frame, width=MAX_X, height=MAX_Y, bg="white")
     canvas.grid(row=0, column=0, sticky="nswe")
 
     if command != "clear":
@@ -397,7 +397,7 @@ def on_close(path, message_label_middle):
         message_label_middle.config(text=new_path)
 
 
-def on_clear(main_frame):
+def on_clear(edit_json_frame):
     global edge_map, room_map, reorganized_json, edge_selection, room_selection, ed_rm_list
     global start_x, start_y, current_edge, current_rectangle, drag_mode
     global canvas, combobox, room_edge_selection, room_index_together
@@ -417,7 +417,7 @@ def on_clear(main_frame):
     canvas =  tkinter.Canvas
     combobox = ttk.Combobox
 
-    init_gui(main_frame, 800, 600, reorganized_json, "clear")
+    init_gui(edit_json_frame, 800, 600, reorganized_json, "clear")
 
 def get_last_room_index():
     if len(list(reorganized_json["rooms"])) == 0:

@@ -3,6 +3,7 @@ from tkinter import ttk as ttk
 from GUI.Styles import PinkPallete as P
 from PIL import Image, ImageTk
 from Assets.Photos import photos
+from GUI.Utils import row_generate
 
 
 class CreateMainFrame(ttk.Frame):
@@ -32,12 +33,8 @@ class CreateMainFrame(ttk.Frame):
         # buttons
         self.new_floorplan = ttk.Button(master=self.left_frame, text="New Floorplan", width=20, style='Pink.TButton')
         self.load_json_btn = ttk.Button(master=self.left_frame, text="Load JSON", width=20, style='Pink.TButton')
-        self.stop_analyzing_btn = ttk.Button(master=self.left_frame,width=3, style='Stop.TButton')
         self.plots_radio = ttk.Radiobutton(self.left_frame, text='Rooms\t', width=10, style='Pink.TRadiobutton')
         self.download_btn = ttk.Button(self.left_frame, text='Download', width=10, style="Pink.TButton")
-        self.settings_btn = ttk.Button(self.left_frame, text='Settings', width=10, style="Pink.TButton")
-        self.signin_btn = ttk.Button(self.left_frame, text='Sign in', width=10, style="Pink.TButton")
-        self.train_model_btn = ttk.Button(self.left_frame, text='Train Model', width=10, style="Pink.TButton")
         info_image = tk.PhotoImage(file=photos.info)
         self.info_btn = ttk.Button(self.left_frame, text='Info', width=10, style="Pink.TButton", image=info_image)
         
@@ -101,12 +98,7 @@ class CreateMainFrame(ttk.Frame):
         self.message_label_middle.grid(row=0, column=1, sticky="ew")
         self.message_label_right.grid(row=0, column=2, sticky='ew')
 
-        def row_generator(start:int):
-            while True:
-                yield start
-                start+=1
-
-        row_i = row_generator(0)
+        row_i = row_generate(0)
         self.new_floorplan.grid(row=next(row_i), column=0, padx=5, pady=5)
         self.load_json_btn.grid(row=next(row_i), column=0, padx=5, pady=5)
         self.download_btn.grid(row=next(row_i), column=0, padx=5, pady=5)

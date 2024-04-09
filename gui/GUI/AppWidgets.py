@@ -148,7 +148,6 @@ class MyNotebook(ScrollableNotebook):
         super().__init__(parent)
         self.counter = 0
         self.tabs = []
-        self.grid_remove()
 
 
 class MyFrame(ttk.Frame):
@@ -157,6 +156,4 @@ class MyFrame(ttk.Frame):
         super().__init__(master, style='Custom.TFrame')
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
-        # self.grid_columnconfigure(2, weight=1)
         self.grid_rowconfigure(0, weight=1)
-        # self.grid_propagate(True)
