@@ -6,6 +6,7 @@ from ParseNewJson import edit_json
 import traceback
 from globals import room_id_to_color, room_name_to_id
 import globals as g 
+from GUI.Utils import find_tag
 
 # ************** Variables that should be cleared when clear is clicked  ************** #
 room_map = {}
@@ -341,9 +342,9 @@ def update_new_coords():
         if current_rectangle in room_map:
             room_map[current_rectangle] = new_coords
 
-            room_type = int(tags[2].split(":")[1])
+            room_type = int(find_tag("room_type", tags))
             rooms_or_doors = "doors" if room_type > 11 else "rooms"
-            room_index = int(tags[1].split(":")[1])
+            room_index = int(find_tag("room_index", tags))
             reorganized_json[rooms_or_doors][room_index]["boxes"] = new_coords
 
         if room_edge_selection:
@@ -504,8 +505,8 @@ def on_mouse_down(event):
     tags = canvas.gettags(item)
     if "box" in tags:
         current_rectangle = item
-        room_index = tags[1].split(":")[1]
-        room_type = tags[2].split(":")[1]
+        room_index = find_tag("room_index", tags)
+        room_type = find_tag("room_type", tags)
         selected_index_sv.set(room_index)
         selected_type_sv.set(room_type+g.room_id_to_name(room_type))
         if room_edge_selection == True:
@@ -516,19 +517,36 @@ def on_mouse_down(event):
             canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
 
     elif "edge" in tags:
-        is_door = False if tags[2].split(":")[-1] == 'False' else True
-        # is_door = bool(tags[3].split(":")[-1])
-        if is_door == True:
-            room_index = tags[1].split(":")[-1]
-            room_type = tags[3].split(":")[1]
-            current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
+        try:
+            if bool(find_tag("edge_is_door:",tags)):
+                room_index = find_tag("edge_room_index", tags)
+                room_index_together = int(room_index)
+                room_type = find_tag("room_type", tags)
+                current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
+                canvas.itemconfigure("edge", width=0.5, fill="black")
+                canvas.itemconfigure("box", width=2, outline="black")
+                canvas.itemconfig(current_rectangle, outline="green")
+                canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
+                selected_index_sv.set(value=room_index)
+                selected_type_sv.set(value=room_type+g.room_id_to_name(room_type))
+        except Exception as e:
+            traceback.format_exc(e)
+
+    elif "label" in tags:
+        try:
+            room_index = find_tag("label_box_index", tags)
             room_index_together = int(room_index)
+            room_type = find_tag("label_box_type", tags)
+            current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
             canvas.itemconfigure("edge", width=0.5, fill="black")
             canvas.itemconfigure("box", width=2, outline="black")
             canvas.itemconfig(current_rectangle, outline="green")
             canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
             selected_index_sv.set(value=room_index)
             selected_type_sv.set(value=room_type+g.room_id_to_name(room_type))
+        except Exception as e:
+            traceback.format_exc(e)
+
 
     start_x, start_y = event.x, event.y
     try:
@@ -613,13 +631,13 @@ def on_mouse_up(event):
         if current_rectangle in room_map:
             room_map[current_rectangle] = new_coords
 
-            room_type = int(tags[2].split(":")[1])
+            room_type = int(find_tag("room_type", tags))
             rooms_or_doors = "doors" if room_type > 11 else "rooms"
-            room_index = int(tags[1].split(":")[1])
+            room_index = int(find_tag("room_index", tags))
             reorganized_json[rooms_or_doors][room_index]["boxes"] = new_coords
 
         if room_edge_selection:
-            room_type = int(tags[2].split(":")[1])
+            room_type = int(find_tag("room_type", tags))
             rooms_or_doors = "doors" if room_type > 11 else "rooms"
             update_edges_coords = canvas.find_withtag(f"edge_room_index:{room_index_together}")
             for i, edge in enumerate(update_edges_coords):
@@ -648,12 +666,12 @@ def start_drag(event):
                 room_index = tag.split(":")[-1]
                 selected_edge.set(room_index)                
                 selected_index_sv.set(value=room_index)
-                selected_type_sv.set(value=tags[3].split(":")[1]+" "+g.room_id_to_name(_type))
+                selected_type_sv.set(value=find_tag("room_index",tags)+" "+g.room_id_to_name(_type))
             if "edge_room_index" in tag:
                 selected_index_sv.set(value=room_index)
-                selected_type_sv.set(value=tags[3].split(":")[1]+" "+g.room_id_to_name(_type))
+                selected_type_sv.set(value=find_tag("edge_room_index",tags)+" "+g.room_id_to_name(_type))
             if "room_type" in tag:
-                room_type = tag.split(":")[-1]
+                room_type = find_tag("room_type", tags)
                 selected_type_sv.set(value=room_type)
                 break
 
@@ -700,16 +718,9 @@ def end_drag(event):
         tags = canvas.gettags(current_edge)
         if current_edge in edge_map:
             edge_map[current_edge][:4] = new_coords
-
-            for tag in tags:
-                if "room_index" in tag:
-                    room_index = int(tag.split(":")[1])
-                    for _tag in tags:
-                        if "edge_index" in _tag:
-                            edge_index = int(_tag.split("=")[-1])
-                            # update edges directly to the reorganized_json no need to concat newdata to originaldata
-                            reorganized_json["rooms"][room_index]["edges"][edge_index][:4] = new_coords
-                    break
+            room_index = int(find_tag("room_index", tags))
+            edge_index = int(find_tag("edge_index", tags))
+            reorganized_json["rooms"][room_index]["edges"][edge_index][:4] = new_coords
 
         current_edge = None
         drag_mode = None
