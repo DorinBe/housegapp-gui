@@ -39,6 +39,8 @@ class StartGUI(ttk.Frame):
         self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
         self.notebook_plots.grid(row=0, column=0, sticky="nswe")
 
+        self.edit_json_frame = MyFrame
+
     def configure_btns(self):
         self.main_frame.load_json_btn.configure(command=lambda: self.open_file(extension='json'))
         self.main_frame.new_floorplan.configure(command=lambda: self.open_file("json", False))
@@ -67,184 +69,28 @@ class StartGUI(ttk.Frame):
         file_path_name = self.path.split('.')[0]
         extension = self.path.split('.')[1]
 
-        # clear graphs and notebooks data
-        # self.notebook_plots = self.notebook_plots.destroy()
-        # self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
-        # self.notebook_plots.grid(row=0, column=0, sticky="nswe")
-
-        # self.main_frame.right_frame.columnconfigure(2, weight=1)
-
-        self.edit_json_frame = MyFrame(self.notebook_plots)
-        # self.edit_json_frame.grid(row=0, column=0, sticky="nswe")
-
-        self.notebook_plots.tabs.append(self.edit_json_frame)
-        self.notebook_plots.add(self.edit_json_frame, text="Edit JSON") 
-        self.notebook_plots.counter += 1
+        if not isinstance(self.edit_json_frame, MyFrame):
+            self.edit_json_frame = MyFrame(self.notebook_plots)
+            self.notebook_plots.tabs.append(self.edit_json_frame)
+            self.notebook_plots.add(self.edit_json_frame, text="Edit JSON") 
+            self.notebook_plots.counter += 1
 
         if extension == "json":
             with open(self.path) as file:
                 original_data = json.load(file)
             reorganized_json = edit_json.reorganize_json(original_data)
             edit_json_gui.init_gui(self.edit_json_frame, MAX_X, MAX_Y, reorganized_json, "init")
-            COF.CreateCanvasOptionsFrame(self.edit_json_frame, file_path_name, reorganized_json, self.edit_json_frame, self.main_frame)\
+            COF.CreateCanvasOptionsFrame(\
+                parent=self.edit_json_frame, file_path_name=file_path_name, reorganized_json=reorganized_json,\
+                edit_json_frame=self.edit_json_frame, main_frame=self.main_frame, notebook_plots=self.notebook_plots)\
                 .grid(row=0, column=3, sticky='nw')
             CJF.CreateCanvasJsonFrame(self.edit_json_frame)\
                 .grid(row=1, column=0, sticky='nw')
             CLF.CreateCanvasLegendFrame(self.edit_json_frame)\
                 .grid(row=0, column=2, sticky='nw')
-            from tkinter.ttk import Button
-            self.generate_btn = Button(self.edit_json_frame, text="Generate", command=lambda: self.select_plots())
-            self.generate_btn.grid(row=2, column=2, sticky='nw')
-            
-        elif extension == "png" or extension == "jpg" or extension == "jpeg":
-            # create a new window
-            self.new_window = tk.Toplevel(self.main_window, width=500, height=100)
-            place_center(self.new_window, width=500, height=100)
-            self.new_window.iconbitmap("house_icon-removebg-preview.ico")
-            self.new_window.grid_columnconfigure(0, weight=1)
-            self.new_window.grid_columnconfigure(1, weight=1)
-            self.new_window.grid_columnconfigure(2, weight=1)
-            self.new_window.grid_columnconfigure(3, weight=1)
-            self.new_window.grid_rowconfigure(0, weight=1)
-            self.new_window.grid_rowconfigure(1, weight=1)
-
-            self.number_of_rooms = 4
-
-            # def choose_fixed():
-            #     self.new_window.destroy()
-            #     self.new_window = tk.Toplevel(self.main_window, width=500, height=100)
-            #     place_center(self.new_window, width=500, height=100)
-            #     self.new_window.iconbitmap("house_icon-removebg-preview.ico")
-            #     self.new_window.grid_columnconfigure(0, weight=1)
-            #     self.new_window.grid_rowconfigure(0, weight=1)
-            #     ttk.Label(self.new_window, text="Fixed Heuristics refinement scheme is chosen.", style="Welcome.TLabel").grid(row=0, column=0)
-
-            # def choose_no_refinement():
-            #     self.new_window.destroy()
-            #     self.new_window = tk.Toplevel(self.main_window, width=500, height=100)
-            #     place_center(self.new_window, width=500, height=100)
-            #     self.new_window.iconbitmap("house_icon-removebg-preview.ico")
-            #     self.new_window.grid_columnconfigure(0, weight=1)
-            #     self.new_window.grid_rowconfigure(0, weight=1)
-            #     ttk.Label(self.new_window, text="No refinement scheme is chosen.", style="Welcome.TLabel").grid(row=0, column=0)
-
-            # def choose_static_scheme():
-                # self.new_window.destroy()
-                # self.num_of_rooms =4 
-                # self.new_window = tk.Toplevel(self.main_window, width=500, height=400)
-                # place_center(self.new_window, width=500, height=200)
-                # self.new_window.iconbitmap("house_icon-removebg-preview.ico")
-                # for i in range(0, self.number_of_rooms+2):
-                #     self.new_window.grid_columnconfigure(i, weight=1)
-                # self.new_window.grid_rowconfigure(0, weight=1)
-                # self.new_window.grid_rowconfigure(1, weight=1)
-                # self.new_window.grid_rowconfigure(2, weight=1)
-                # self.new_window.grid_rowconfigure(3, weight=1)
-                # ttk.Label(self.new_window, text="Static refinement scheme is chosen.", style="Welcome.TLabel",anchor='center').grid(row=0, column=0, columnspan=self.number_of_rooms+2, sticky='w')
-
-                # for i in range(0,self.num_of_rooms,1):
-                #     ttk.Label(self.new_window, text="Room " + str(i+1), style="Welcome.TLabel").grid(row=1, column=i)
-                #     ttk.Entry(self.new_window, width=10).grid(row=2, column=i)
-                # ttk.Label(self.new_window, text="In doors",style="Welcome.TLabel").grid(row=1, column=self.num_of_rooms+1)
-                # ttk.Entry(self.new_window, width=10).grid(row=2, column=self.num_of_rooms+1)
-                # ttk.Label(self.new_window, text="Out doors", style="Welcome.TLabel").grid(row=1, column=self.num_of_rooms+2)
-                # ttk.Entry(self.new_window, width=10).grid(row=2, column=self.num_of_rooms+2)
-                # button = ttk.Button(self.new_window, text="Generate", style="Pink.TButton")
-                # button.grid(row=3, column=0, columnspan=self.number_of_rooms+2, sticky='nsew')
-
-            # def choose_dynamic_scheme():
-                #copy static scheme
-                # self.new_window.destroy()
-                # self.num_of_rooms =4 
-                # self.new_window = tk.Toplevel(self.main_window, width=500, height=100)
-                # place_center(self.new_window, width=500, height=250)
-                # self.new_window.iconbitmap("house_icon-removebg-preview.ico")
-                # for i in range(0, self.number_of_rooms+2):
-                #     self.new_window.grid_columnconfigure(i, weight=1)
-                # self.new_window.grid_rowconfigure(0, weight=1)
-                # self.new_window.grid_rowconfigure(1, weight=1)
-                # self.new_window.grid_rowconfigure(2, weight=1)
-                # self.new_window.grid_rowconfigure(3, weight=1)
-                # ttk.Label(self.new_window, text="Static refinement scheme is chosen.", style="Welcome.TLabel",anchor='center').grid(row=0, column=0, columnspan=self.number_of_rooms+2, sticky='w')
-
-                # for i in range(0,self.num_of_rooms,1):
-                #     ttk.Label(self.new_window, text="Room " + str(i+1), style="Welcome.TLabel").grid(row=1, column=i)
-                #     ttk.Entry(self.new_window, width=10).grid(row=2, column=i)
-                # ttk.Label(self.new_window, text="In doors",style="Welcome.TLabel").grid(row=1, column=self.num_of_rooms+1)
-                # ttk.Entry(self.new_window, width=10).grid(row=2, column=self.num_of_rooms+1)
-                # ttk.Label(self.new_window, text="Out doors", style="Welcome.TLabel").grid(row=1, column=self.num_of_rooms+2)
-                # ttk.Entry(self.new_window, width=10).grid(row=2, column=self.num_of_rooms+2)
-
-                # self.new_window.grid_rowconfigure(4, weight=1)
-                # self.new_window.grid_rowconfigure(5, weight=1)
-                # for i in range(0,self.num_of_rooms,1):
-                #     ttk.Label(self.new_window, text="Room " + str(i+1), style="Welcome.TLabel").grid(row=3, column=i)
-                #     ttk.Entry(self.new_window, width=10).grid(row=4, column=i)
-                # ttk.Label(self.new_window, text="In doors",style="Welcome.TLabel").grid(row=3, column=self.num_of_rooms+1)
-                # ttk.Entry(self.new_window, width=10).grid(row=4, column=self.num_of_rooms+1)
-                # ttk.Label(self.new_window, text="Out doors", style="Welcome.TLabel").grid(row=3, column=self.num_of_rooms+2)
-                # ttk.Entry(self.new_window, width=10).grid(row=4, column=self.num_of_rooms+2)
-                # ttk.Button(self.new_window, text="Generate", style="Pink.TButton").grid(row=5, column=0,columnspan=self.number_of_rooms+2, sticky='ew')
-
-
-            # ttk.Label(self.new_window, text=f"System identified {self.number_of_rooms} rooms\nChoose desired refinement scheme", style="Welcome.TLabel").grid(row=0, column=0, columnspan=4)
-            # ttk.Button(self.new_window, text="No Refinement", style="Pink.TButton", command=choose_no_refinement).grid(row=1, column=0)
-            # ttk.Button(self.new_window, text="Fixed Heuristic", style="Pink.TButton", command=choose_fixed).grid(row=1, column=1)
-            # ttk.Button(self.new_window, text="Static Scheme", style="Pink.TButton",command=choose_static_scheme).grid(row=1, column=2)
-            # ttk.Button(self.new_window, text="Dynamic Scheme", style="Pink.TButton",command=choose_dynamic_scheme).grid(row=1, column=3)
-
-            # # create a new frame
-            # self.dynamic_scheme_frame = tk.Frame(self.new_window)
-            # self.dynamic_scheme_frame.grid(row=0, column=0, sticky='nsew')
-            # ttk.Label(self.dynamic_scheme_frame, text="HouseGan++ detected _ rooms").grid(row=0, columnspan=(self.num_of_rooms+4*2))
-            # ttk.Label(self.dynamic_scheme_frame, text="Please initialize the refinement scheme mode if necessary").grid(row=1, columnspan=(self.num_of_rooms+4*2))
-
-            # room_numer=1
-            # out_i = 0
-            # for i in range(0,self.num_of_rooms+4,2):
-            #     ttk.Label(self.dynamic_scheme_frame, text="Room " + str(room_numer)).grid(row=2, column=i, sticky='w')
-            #     ttk.Entry(self.dynamic_scheme_frame, width=10).grid(row=2, column=i+1, sticky='w')
-            #     room_numer+=1
-            #     out_i = i 
-            # ttk.Label(self.dynamic_scheme_frame, text="In doors").grid(row=2, column=out_i, sticky='w')
-            # ttk.Entry(self.dynamic_scheme_frame, width=10).grid(row=2, column=out_i+1, sticky='w')
-            # ttk.Label(self.dynamic_scheme_frame, text="Out doors").grid(row=2, column=out_i+2, sticky='w')
-            # ttk.Entry(self.dynamic_scheme_frame, width=10).grid(row=2, column=out_i+3, sticky='w')
-            # room_numer=1
-            # for i in range(0,self.num_of_rooms+4,2):
-            #     ttk.Label(self.dynamic_scheme_frame, text="Room " + str(room_numer)).grid(row=3, column=i, sticky='w')
-            #     ttk.Entry(self.dynamic_scheme_frame, width=10).grid(row=3, column=i+1, sticky='w')
-            #     room_numer+=1
-            #     out_i = i 
-            # ttk.Label(self.dynamic_scheme_frame, text="In doors").grid(row=3, column=out_i, sticky='w')
-            # ttk.Entry(self.dynamic_scheme_frame, width=10).grid(row=3, column=out_i+1, sticky='w')
-            # ttk.Label(self.dynamic_scheme_frame, text="Out doors").grid(row=3, column=out_i+2, sticky='w')
-            # ttk.Entry(self.dynamic_scheme_frame, width=10).grid(row=3, column=out_i+3, sticky='w')
-            # ttk.Button(self.dynamic_scheme_frame, text="OK", command=self.new_window.destroy, style="Blue.TButton").grid(row=3, columnspan=(self.num_of_rooms+4*2))
-
         else:
             messagebox.showerror(message="Selected file is not supported.")
             return
-
-    def select_plots(self):
-        global ad_new_tab_flag
-
-        frame = MyFrame(self.notebook_plots)
-        self.notebook_plots.tabs.append(frame)
-        self.notebook_plots.add(frame, text="Floor Plan")   
-        self.notebook_plots.counter += 1 
-
-        # pick_sites_label = ttk.Label(frame, style="Settings.TLabel", text=pick_sites_text, font=("Helvetica", 12))
-        # show 'floorplan.png' in the frame
-        self.img = ImageTk.PhotoImage(Image.open("floorplan.png"))
-        self.floor_plan_label = ttk.Label(frame, image=self.img)
-        self.floor_plan_label.grid(row=0, column=0)
-        # floor_plan_label.grid_columnconfigure(0, weight=1)
-        # floor_plan_label.grid_rowconfigure(0, weight=1)
-        # self.notebook_plots.counter += 1
-
-        self.notebook_plots.grid(row=0, column=0, sticky="nswe")
-        ad_new_tab_flag = False
 
     # def signin_button(self):
     #     self.selected.set(-1)

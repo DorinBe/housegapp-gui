@@ -164,3 +164,4 @@ Logic/__pycache__/
 *.csv
 *.json
 Asset/Jsons/*.json
+url.env
