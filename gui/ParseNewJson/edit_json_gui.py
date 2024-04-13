@@ -240,11 +240,7 @@ def draw_random_door(direction):
 
     # a door's index is num of rooms+doors+1
     # but at the end, a new order is formed so in the beginning "doors" starts from key 1
-    if list(reorganized_json["doors"]) == []:
-        new_door_index = 0
-    else:
-        new_door_index = list(reorganized_json["doors"])[-1]+1
-    new_together_door_index = len(reorganized_json["rooms"])+len(reorganized_json["doors"])
+    new_door_index = len(reorganized_json["rooms"])+len(reorganized_json["doors"])
     
     try:
         reorganized_json["doors"].update({new_door_index:{"boxes":random_door, "edges":[], "ed_rm":[], 
@@ -260,14 +256,14 @@ def draw_random_door(direction):
         messagebox.showerror("please fill entries", "no neighbors were added in entries")
 
     # update_edges_and_ed_rm_to_add_random_door(door_index, door_type, room_types, room_indexes)
-    draw_random_box(random_door, door_type, new_together_door_index)
+    draw_random_box(random_door, door_type, new_door_index)
 
 
     # draw_random_edge(random_edges,new_door_index,"doors",door_type,new_together_door_index)
     draw_random_edge(random_edges=random_edges,
                      box_index=new_door_index,
                      rooms_or_doors="doors",
-                     together_room_index=new_together_door_index,
+                     together_room_index=new_door_index,
                      door_type=door_type)
 
     if room_indexes == ['']:
@@ -799,9 +795,6 @@ def generate_floorplan(self, path, message_label_middle,notebook_plots):
         if not room_map:
             draw_boxes(reorganized_json)
 
-    """already updated reorganized_json with the new data in previous stages (end_drag, on_mouse_up)"""
-    # newdata = concat_newdata_to_originaldata(originaldata)
-    # reorganized_json = edit_json.reorganize_json(reorganized_json)
     original_format_json = edit_json.deorganize_format(reorganized_json)
     load_dotenv('url.env')
     url = os.getenv("URL")
