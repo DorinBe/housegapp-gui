@@ -8,6 +8,8 @@ from globals import room_id_to_color, room_name_to_id
 import globals as g 
 from GUI.Utils import find_tag
 
+from gui_path import env_path
+
 # ************** Variables that should be cleared when clear is clicked  ************** #
 room_map = {}
 edge_map = {}
@@ -796,7 +798,8 @@ def generate_floorplan(self, path, message_label_middle,notebook_plots):
             draw_boxes(reorganized_json)
 
     original_format_json = edit_json.deorganize_format(reorganized_json)
-    load_dotenv('url.env')
+    edit_json.dump_boxes(path, original_format_json)
+    load_dotenv(env_path)
     url = os.getenv("URL")
     result = post(url, json=original_format_json)
     image_data = result.content

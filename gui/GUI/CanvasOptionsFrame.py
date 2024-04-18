@@ -1,4 +1,4 @@
-from tkinter import ttk
+from tkinter import ttk, DISABLED
 from tkinter.ttk import Button
 import ParseNewJson.edit_json_gui as ejg
 from GUI.Utils import row_generate
@@ -15,7 +15,7 @@ class CreateCanvasOptionsFrame(ttk.Frame):
                     .grid(row=next(row_i), column=2, sticky="nw")
         Button(self, text="Room Selection", command=lambda: ejg.draw_boxes(reorganized_json))\
                     .grid(row=next(row_i),column=2, sticky='nw')
-        Button(self, text="Edge selection", command=lambda: ejg.draw_edges(reorganized_json))\
+        Button(self, text="Edge selection", command=lambda: ejg.draw_edges(reorganized_json), state=DISABLED)\
                     .grid(row=next(row_i), column=2, sticky="nw")
         Button(self, text="Both Selection", command=lambda: ejg.move_edges_and_boxes_together())\
                     .grid(row=next(row_i), column=2, sticky='nw')
