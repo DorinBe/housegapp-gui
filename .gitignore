@@ -162,11 +162,13 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-GUI/__pycache__/
-Logic/__pycache__/
-*.csv
 *.json
-dataset.rar
-dataset/
-gui/GUI/PythonCode/__pycache__/Styles.cpython-310.pyc
-gui/ParseJsons/__pycache__/edit_json_gui.cpython-310.pyc
+*.mp4
+*.env
+/gui/Assets/Extraction/app/dump/*.png
+/gui/Assets/Extraction/app/dump/*.ps
+Assets/Extraction/*.zip
+/Capstone Project Phase A-23-06-R-14.docx
+/Capstone Project Phase A-23-06-R-14.pdf
+/Capstone Project Phase A-23-06-R-14.pptx
+/Capstone Project Phase B-23-06-R-14.pptx

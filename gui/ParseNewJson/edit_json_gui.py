@@ -1,6 +1,6 @@
 import tkinter
 from tkinter import ttk, messagebox, StringVar, Canvas
-
+import os
 from functools import partial
 from ParseNewJson import edit_json
 import traceback
@@ -8,7 +8,9 @@ from globals import room_id_to_color, room_name_to_id
 import globals as g 
 from GUI.Utils import find_tag
 
+
 from gui_path import env_path
+from Assets.Extraction.extraction import extraction_path, dump_path
 
 # ************** Variables that should be cleared when clear is clicked  ************** #
 room_map = {}
@@ -773,23 +775,44 @@ def move_edges_and_boxes_together():
     canvas.bind("<Left>", partial(move_left))
     canvas.bind("<Right>", partial(move_right))
 
-def create_new_tab(notebook_plots):
+def create_new_tab(notebook_plots, name="Floor Plan"):
     from GUI.AppWidgets import MyFrame
     
     frame = MyFrame(notebook_plots)
     notebook_plots.tabs.append(frame)
-    notebook_plots.add(frame, text="Floor Plan")   
+    notebook_plots.add(frame, text=name)   
     notebook_plots.counter += 1 
     return frame
+
+def handle_zip_file(zip_content):
+    from io import BytesIO
+    import zipfile
+
+    zip_file_path = os.path.join(extraction_path, 'response.zip')
+    with open(zip_file_path, 'wb') as file:
+        file.write(zip_content)
+    zip_in_memory = BytesIO(zip_content)
+    with zipfile.ZipFile(zip_in_memory, 'r') as zip_ref:
+        zip_ref.extractall(extraction_path)
+
+def save_canvas():
+    global canvas
+    from PIL import Image as PilImage
+
+    canvas_ps_path = os.path.join(dump_path, "canvas.ps")
+    canvas_img_path = os.path.join(dump_path, "canvas_image.png")
+
+    canvas.postscript(file=canvas_ps_path, colormode='color')
+    img = PilImage.open(canvas_ps_path)
+    img.save(canvas_img_path, "png")
 
 def generate_floorplan(self, path, message_label_middle,notebook_plots):
     global reorganized_json
 
     from requests import post
-    import os
     from dotenv import load_dotenv
-    from io import BytesIO
     from PIL import Image, ImageTk
+    from datetime import datetime
 
     if len(reorganized_json["room_types"])!=0:
         if not edge_map:
@@ -802,15 +825,36 @@ def generate_floorplan(self, path, message_label_middle,notebook_plots):
     load_dotenv(env_path)
     url = os.getenv("URL")
     result = post(url, json=original_format_json)
-    image_data = result.content
 
-    self.image = Image.open(BytesIO(image_data))
-    self.frame = create_new_tab(notebook_plots)
-    self.img = ImageTk.PhotoImage(self.image)
-    self.floor_plan_label = ttk.Label(self.frame, image=self.img)
-    self.floor_plan_label.grid(row=0, column=0)
+    if result.status_code != 200:
+        message_label_middle.config(text="Error on request to server. Please try again.")
+        return
+    
+    handle_zip_file(result.content)
+    save_canvas()
+    
+    timestamp = str(datetime.now().strftime("%H-%M-%S"))
 
-    notebook_plots.grid(row=0, column=0, sticky="nswe")
+    setattr(self, f"canvas_image_{timestamp}", Image.open(os.path.join(extraction_path,"app","dump", "canvas_image.png")))
+    setattr(self, f"fp_image_{timestamp}", Image.open(os.path.join(extraction_path,"app","dump", "fp_0.png")))
+    setattr(self, f"graph_image_{timestamp}", Image.open(os.path.join(extraction_path,"app","dump", "graph_0.png")))
+    
+    self.frame = create_new_tab(notebook_plots, name=f"{timestamp}")
+    self.frame.grid_columnconfigure(0, weight=1)
+    self.frame.grid_rowconfigure(0, weight=1)
+    self.frame.grid_rowconfigure(1, weight=1)
+
+    setattr(self, f"canvas_image_tk_{timestamp}", ImageTk.PhotoImage(getattr(self, f"canvas_image_{timestamp}")))
+    setattr(self, f"fp_image_tk_{timestamp}", ImageTk.PhotoImage(getattr(self, f"fp_image_{timestamp}")))
+    setattr(self, f"graph_image_tk_{timestamp}", ImageTk.PhotoImage(getattr(self, f"graph_image_{timestamp}")))
+
+    setattr(self, f"canvas_image_tk_label_{timestamp}", ttk.Label(self.frame, image=getattr(self, f"canvas_image_tk_{timestamp}")))
+    setattr(self, f"fp_image_tk_label_{timestamp}", ttk.Label(self.frame, image=getattr(self, f"fp_image_tk_{timestamp}")))
+    setattr(self, f"graph_image_label_{timestamp}", ttk.Label(self.frame, image=getattr(self, f"graph_image_tk_{timestamp}")))
+
+    getattr(self, f"canvas_image_tk_label_{timestamp}").grid(row=0, column=1, sticky="nswe")
+    getattr(self, f"fp_image_tk_label_{timestamp}").grid(row=0, column=0, sticky="nswe")
+    getattr(self, f"graph_image_label_{timestamp}").grid(row=1, column=0, sticky="nswe")
     
 def print_all_tags():
     global canvas
