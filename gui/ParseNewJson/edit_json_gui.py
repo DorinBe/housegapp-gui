@@ -483,55 +483,40 @@ def append_ed_rm_list(room_index, neigh_room_indexes):
             res.append([room_index, int(neigh_index)])
     return res
 
+def update_globals_and_visualize_selection(tags, room_index):
+    global current_rectangle, canvas, room_index_together, room_edge_selection, selected_index_sv, selected_type_sv
+    
+    room_type = find_tag("room_type", tags)
+    selected_index_sv.set(room_index)
+    selected_type_sv.set(room_type+g.room_id_to_name(room_type))
+    if room_edge_selection == True:
+        room_index_together = int(room_index)
+        canvas.itemconfigure("edge", width=0.5, fill="black")
+        canvas.itemconfigure("box", width=2, outline="black")
+        canvas.itemconfig(current_rectangle, outline="green")
+        canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
+
 def on_mouse_down(event):
     global current_rectangle, action_type, start_x, start_y, resize_edge, canvas
     global room_index_together, room_edge_selection, selected_index_sv, selected_type_sv
 
     item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
+
     if "box" in tags:
         current_rectangle = item
         room_index = find_tag("room_index", tags)
-        room_type = find_tag("room_type", tags)
-        selected_index_sv.set(room_index)
-        selected_type_sv.set(room_type+g.room_id_to_name(room_type))
-        if room_edge_selection == True:
-            room_index_together = int(room_index)
-            canvas.itemconfigure("edge", width=0.5, fill="black")
-            canvas.itemconfigure("box", width=2, outline="black")
-            canvas.itemconfig(current_rectangle, outline="green")
-            canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
+        update_globals_and_visualize_selection(tags, room_index)
 
     elif "edge" in tags:
-        try:
-            if bool(find_tag("edge_is_door:",tags)):
-                room_index = find_tag("edge_room_index", tags)
-                room_index_together = int(room_index)
-                room_type = find_tag("room_type", tags)
-                current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
-                canvas.itemconfigure("edge", width=0.5, fill="black")
-                canvas.itemconfigure("box", width=2, outline="black")
-                canvas.itemconfig(current_rectangle, outline="green")
-                canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
-                selected_index_sv.set(value=room_index)
-                selected_type_sv.set(value=room_type+g.room_id_to_name(room_type))
-        except Exception as e:
-            traceback.format_exc(e)
+        room_index = find_tag("room_index", tags)
+        current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
+        update_globals_and_visualize_selection(tags, room_index)
 
     elif "label" in tags:
-        try:
-            room_index = find_tag("label_box_index", tags)
-            room_index_together = int(room_index)
-            room_type = find_tag("label_box_type", tags)
-            current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
-            canvas.itemconfigure("edge", width=0.5, fill="black")
-            canvas.itemconfigure("box", width=2, outline="black")
-            canvas.itemconfig(current_rectangle, outline="green")
-            canvas.itemconfigure(f"edge_room_index:{room_index}", fill="green")
-            selected_index_sv.set(value=room_index)
-            selected_type_sv.set(value=room_type+g.room_id_to_name(room_type))
-        except Exception as e:
-            traceback.format_exc(e)
+        room_index = find_tag("room_index", tags)
+        current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
+        update_globals_and_visualize_selection(tags, room_index)
 
     start_x, start_y = event.x, event.y
     try:
@@ -557,6 +542,8 @@ def on_mouse_down(event):
         resize_edge = None
 
     action_type = "resize" if resize_edge else "move"
+    if bool(find_tag("edge_is_door:",tags)): # force door to only be moved and not resized.
+        action_type = "move"
     canvas.itemconfig(current_rectangle, outline="green")
     canvas.focus_set()
 
