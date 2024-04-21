@@ -10,6 +10,13 @@ from GUI.Utils import find_tag
 from gui_path import env_path
 from Assets.Extraction.extraction import extraction_path, dump_path
 
+# please note that start drag, drag, and end drag functions are not used in the current implementation
+# they are kept for future use when implementing edge selection only
+# edge selection needs more refinement and testing
+# problem is that if edges pixels are not adjacent to each other, then the edge selection will not work properly
+# not adjacent pixels are minor difference like x2 of one edge is 100.0 but x1 of the other edge is 101.0
+
+# these empty global variables might be useful when implement edge selection only
 room_map = {}
 edge_map = {}
 ed_rm_list = []
@@ -92,35 +99,30 @@ def draw_rectangle_and_label(canvas:Canvas, x1:float, y1:float, x2:float, y2:flo
 
 def draw_boxes(data):
     global edge_selection, room_selection, room_edge_selection, room_index_together, canvas
+
     edge_selection = False
     room_selection = True
     room_edge_selection = False
     room_index_together = None
 
-    if room_map != {}:
+    if room_map != {}: # rooms have not been drawn yet
         canvas.itemconfigure("edge", width=0.5, fill="gray")
         canvas.itemconfigure("box", width=2, outline="black")
         canvas.tag_raise("box")
         canvas.tag_raise("label")
         canvas.tag_lower("edge")
 
-        canvas.bind("<Button-1>", partial(on_mouse_down))
-        canvas.bind("<B1-Motion>", partial(on_mouse_move))
-        canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
-        return
-
-    for room in {**data["rooms"],**data["doors"]}.items():
-        room_index = room[0]
-        room_type = room[1]["room_type"]
-        room_color = room_id_to_color(room_type)
+    else:
+        for room in {**data["rooms"],**data["doors"]}.items():
+            room_index = room[0]
+            room_type = room[1]["room_type"]
+            room_color = room_id_to_color(room_type)
+            
+            box = room[1]["boxes"]
+            x1, y1, x2, y2 = box
+            item_id = draw_rectangle_and_label(canvas, x1, y1, x2, y2, room_color, room_index, room_type)
+            room_map[item_id] = box
         
-        box = room[1]["boxes"]
-        x1, y1, x2, y2 = box
-        item_id = draw_rectangle_and_label(canvas, x1, y1, x2, y2, room_color, room_index, room_type)
-        room_map[item_id] = box
-        x, y = edit_json.calculate_average_of_box(box)
-        
-    
     canvas.bind("<Button-1>", partial(on_mouse_down))
     canvas.bind("<B1-Motion>", partial(on_mouse_move))
     canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
@@ -159,6 +161,7 @@ def draw_line(canvas:Canvas, x1:float, y1:float, x2:float, y2:float, room_index:
 def draw_edges(data):
     """input: reorganized_data"""
     global edge_selection, room_selection, room_edge_selection, room_index_together, canvas
+
     edge_selection = True
     room_selection = False
     room_edge_selection = False
@@ -170,26 +173,23 @@ def draw_edges(data):
         canvas.tag_raise("edge")
         canvas.tag_raise("label")
         canvas.tag_lower("box")
-        canvas.bind("<Button-1>", partial(start_drag))
-        canvas.bind("<B1-Motion>", partial(drag))
-        canvas.bind("<ButtonRelease-1>", partial(end_drag))
-        return
 
-    for room in {**data["rooms"], **data["doors"]}.items():
-        room_index = room[0]
-        edges = room[1]["edges"]
-        box = room[1]["boxes"]
-        room_type = room[1]["room_type"]
+    else:
+        for room in {**data["rooms"], **data["doors"]}.items():
+            room_index = room[0]
+            edges = room[1]["edges"]
+            box = room[1]["boxes"]
+            room_type = room[1]["room_type"]
 
-        is_door = True if room_type > 11 else False
-        for edge in edges:
-            try:
-                x1, y1, x2, y2, room_type, neighbor_room = edge
-                door_type = room_type if is_door else None
-                item_id = draw_line(canvas, x1, y1, x2, y2, room_index, is_door, room_type, door_type)
-                edge_map[item_id] = edge                    
-            except Exception as e:
-                traceback.format_exc(e)
+            is_door = True if room_type > 11 else False
+            for edge in edges:
+                try:
+                    x1, y1, x2, y2, room_type, neighbor_room = edge
+                    door_type = room_type if is_door else None
+                    item_id = draw_line(canvas, x1, y1, x2, y2, room_index, is_door, room_type, door_type)
+                    edge_map[item_id] = edge                    
+                except Exception as e:
+                    traceback.format_exc(e)
 
     canvas.bind("<Button-1>", partial(start_drag))
     canvas.bind("<B1-Motion>", partial(drag))
@@ -227,16 +227,13 @@ def draw_random_door(direction):
 
     if direction == "horizontal":
         rd = random_door = [x,y,x+x_threshold,y+y_threshold]
-        random_edges = [[rd[0],rd[1],rd[0],rd[3],door_type, int(room_types[0])],
-                        [rd[0],rd[3],rd[2],rd[3],door_type, int(room_types[1])],
-                        [rd[2],rd[3],rd[2],rd[1],door_type, int(room_types[2])],
-                        [rd[2],rd[1],rd[0],rd[1],door_type, int(room_types[3])]]
     else:
         rd = random_door = [x,y,x+y_threshold,y+x_threshold]
-        random_edges = [[rd[0],rd[1],rd[0],rd[3],door_type, int(room_types[0])],
-                        [rd[0],rd[3],rd[2],rd[3],door_type, int(room_types[1])],
-                        [rd[2],rd[3],rd[2],rd[1],door_type, int(room_types[2])],
-                        [rd[2],rd[1],rd[0],rd[1],door_type, int(room_types[3])]]
+
+    random_edges = [[rd[0],rd[1],rd[0],rd[3],door_type, int(room_types[0])],
+                    [rd[0],rd[3],rd[2],rd[3],door_type, int(room_types[1])],
+                    [rd[2],rd[3],rd[2],rd[1],door_type, int(room_types[2])],
+                    [rd[2],rd[1],rd[0],rd[1],door_type, int(room_types[3])]]
 
     new_door_index = len(reorganized_json["rooms"])+len(reorganized_json["doors"])
     try:
@@ -349,7 +346,6 @@ def on_close(path, message_label_middle):
                                     "ed_rm"=[[0], [0, 2],....]} # where 0 is corresponding room_index and 2 is neighbor_index
     """
     global reorganized_json
-    # check all items on canvas 
 
     if len(reorganized_json["room_types"])!=0:
         if not edge_map:
