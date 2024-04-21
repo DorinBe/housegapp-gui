@@ -839,18 +839,15 @@ def generate_floorplan(self, path, message_label_middle,notebook_plots):
     setattr(self, f"fp_image_{timestamp}", Image.open(os.path.join(extraction_path,"app","dump", "fp_0.png")))
     setattr(self, f"graph_image_{timestamp}", Image.open(os.path.join(extraction_path,"app","dump", "graph_0.png")))
     
-    self.frame = create_new_tab(notebook_plots, name=f"{timestamp}")
-    self.frame.grid_columnconfigure(0, weight=1)
-    self.frame.grid_rowconfigure(0, weight=1)
-    self.frame.grid_rowconfigure(1, weight=1)
+    create_new_tab(notebook_plots, name=f"{timestamp}")
 
     setattr(self, f"canvas_image_tk_{timestamp}", ImageTk.PhotoImage(getattr(self, f"canvas_image_{timestamp}")))
     setattr(self, f"fp_image_tk_{timestamp}", ImageTk.PhotoImage(getattr(self, f"fp_image_{timestamp}")))
     setattr(self, f"graph_image_tk_{timestamp}", ImageTk.PhotoImage(getattr(self, f"graph_image_{timestamp}")))
 
-    setattr(self, f"canvas_image_tk_label_{timestamp}", ttk.Label(self.frame, image=getattr(self, f"canvas_image_tk_{timestamp}")))
-    setattr(self, f"fp_image_tk_label_{timestamp}", ttk.Label(self.frame, image=getattr(self, f"fp_image_tk_{timestamp}")))
-    setattr(self, f"graph_image_label_{timestamp}", ttk.Label(self.frame, image=getattr(self, f"graph_image_tk_{timestamp}")))
+    setattr(self, f"canvas_image_tk_label_{timestamp}", ttk.Label(notebook_plots.tabs[-1], image=getattr(self, f"canvas_image_tk_{timestamp}"), background="white", relief="solid", borderwidth=0.5))
+    setattr(self, f"fp_image_tk_label_{timestamp}", ttk.Label(notebook_plots.tabs[-1], image=getattr(self, f"fp_image_tk_{timestamp}"), background="white", relief="solid", borderwidth=0.5))
+    setattr(self, f"graph_image_label_{timestamp}", ttk.Label(notebook_plots.tabs[-1], image=getattr(self, f"graph_image_tk_{timestamp}"), background="white", relief="solid", borderwidth=0.5))
 
     getattr(self, f"canvas_image_tk_label_{timestamp}").grid(row=0, column=1, sticky="nswe")
     getattr(self, f"fp_image_tk_label_{timestamp}").grid(row=0, column=0, sticky="nswe")
