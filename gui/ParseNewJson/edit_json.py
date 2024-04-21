@@ -2,11 +2,7 @@ from datetime import datetime
 import json
 import traceback
 
-def add_is_inner_room(reorganized_json) -> dict:
-    for room in reorganized_json["rooms"].values():
-        room["is_inner_room"] = False
-    return reorganized_json
-
+# First three functions were meant fix the edge selection problem depicted in edit_json_gui.py
 
 def is_edge_inside_box(edge, box):
     """Check if an edge is inside a box"""
@@ -75,13 +71,6 @@ def calculate_average_of_box(box):
     """Calculate the average of a box"""
     x_min, y_min, x_max, y_max = box
     return (x_min + x_max) / 2, (y_min + y_max) / 2
-
-def can_draw_label(prev_room_index, room_index):
-    if prev_room_index == -1:
-        return True
-    if prev_room_index != room_index:
-        return True
-    return False
 
 def reorganize_json(data):
     """Reorganize the original data format {"room_type"=[], "boxes"=[], ...} to a simpler format 
