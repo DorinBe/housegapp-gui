@@ -503,20 +503,9 @@ def on_mouse_down(event):
     item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
 
-    if "box" in tags:
-        current_rectangle = item
-        room_index = find_tag("room_index", tags)
-        update_globals_and_visualize_selection(tags, room_index)
-
-    elif "edge" in tags:
-        room_index = find_tag("room_index", tags)
-        current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
-        update_globals_and_visualize_selection(tags, room_index)
-
-    elif "label" in tags:
-        room_index = find_tag("room_index", tags)
-        current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
-        update_globals_and_visualize_selection(tags, room_index)
+    room_index = find_tag("room_index", tags)
+    current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
+    update_globals_and_visualize_selection(tags, room_index)
 
     start_x, start_y = event.x, event.y
     try:
@@ -548,8 +537,8 @@ def on_mouse_down(event):
     canvas.focus_set()
 
 def on_mouse_move(event):
-    global start_x, start_y,current_rectangle, drag_mode
-    global resize_edge, canvas, action_type, room_index_together
+    global start_x, start_y,current_rectangle, resize_edge, canvas, action_type
+
     dx,dy = 0,0
 
     if current_rectangle and action_type == "move":
@@ -705,33 +694,12 @@ def on_mouse_move_together(event):
 def on_mouse_up_together(event):
     on_mouse_up(event)
     end_drag(event)
-    
-def move_up(event):
-    global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, 0, -units)
-    canvas.move(f"label_box_index:{room_index_together}", 0, -units)
-    canvas.move(f"edge_room_index:{room_index_together}", 0, -units)
-    update_new_coords()
 
-def move_down(event):
+def move(event, dx, dy):
     global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, 0, units)
-    canvas.move(f"label_box_index:{room_index_together}", 0, units)
-    canvas.move(f"edge_room_index:{room_index_together}", 0, units)
-    update_new_coords()
-
-def move_left(event):
-    global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, -units, 0)
-    canvas.move(f"label_box_index:{room_index_together}", -units, 0)
-    canvas.move(f"edge_room_index:{room_index_together}", -units, 0)
-    update_new_coords()
-
-def move_right(event):
-    global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, units, 0)
-    canvas.move(f"label_box_index:{room_index_together}", units, 0)
-    canvas.move(f"edge_room_index:{room_index_together}",  units, 0)
+    canvas.move(current_rectangle, dx, dy)
+    canvas.move(f"label_box_index:{room_index_together}", dx, dy)
+    canvas.move(f"edge_room_index:{room_index_together}", dx, dy)
     update_new_coords()
 
 def move_edges_and_boxes_together():
@@ -740,10 +708,10 @@ def move_edges_and_boxes_together():
     canvas.bind("<Button-1>", partial(on_mouse_down_together))
     canvas.bind("<B1-Motion>", partial(on_mouse_move_together))
     canvas.bind("<ButtonRelease-1>", partial(on_mouse_up_together))
-    canvas.bind("<Up>", partial(move_up))
-    canvas.bind("<Down>", partial(move_down))
-    canvas.bind("<Left>", partial(move_left))
-    canvas.bind("<Right>", partial(move_right))
+    canvas.bind("<Up>", lambda event, u=units: move(event, 0, -u))
+    canvas.bind("<Down>", lambda event, u=units: move(event, 0, u))
+    canvas.bind("<Left>", lambda event, u=units: move(event, -u, 0))
+    canvas.bind("<Right>", lambda event, u=units: move(event, u, 0))
 
 def create_new_tab(notebook_plots, name="Floor Plan"):
     from GUI.AppWidgets import MyFrame
