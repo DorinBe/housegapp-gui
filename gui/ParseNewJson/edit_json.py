@@ -175,7 +175,7 @@ def dump_boxes(path, fixed_json):
     try:
         import os     
         path = os.path.dirname(path)
-        path = path + '_' + str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + '.json'
+        path = os.path.join(path, str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))+'.json')
         with open(path, 'a+') as file:
             json.dump(fixed_json, file)
     except Exception as e:
