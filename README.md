@@ -12,3 +12,9 @@ Capstone Project Phase B. While experimenting the model, struggled with editing 
 - Load an existing JSON file, or start from scratch.
 - Edit the neighbours as necessary.
 - Generate the floorplan - here the pretrained model is running on CPU.
+
+### Installing
+- Developed with Python 3.10.11 on Windows 11.
+- Install [GhostScript](https://www.ghostscript.com/)
+- `pip install -r requierments.txt`
+- run gui/main.py
