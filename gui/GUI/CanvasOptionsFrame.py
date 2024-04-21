@@ -19,9 +19,12 @@ class CreateCanvasOptionsFrame(ttk.Frame):
                     .grid(row=next(row_i), column=2, sticky="nw")
         Button(self, text="Both Selection", command=lambda: ejg.move_edges_and_boxes_together())\
                     .grid(row=next(row_i), column=2, sticky='nw')
-        Button(self,  text="Generate", command=lambda: \
+        Button(self,  text="Generate with GCP", command=lambda: \
                ejg.generate_floorplan(self, file_path_name, main_frame.message_label_middle,notebook_plots))\
                     .grid(row=next(row_i), column=2, sticky='nw')
+        Button(self,  text="Generate with local .pth", command=lambda: \
+            ejg.generate_floorplan_local_model(self, file_path_name, main_frame.message_label_middle,notebook_plots))\
+                .grid(row=next(row_i), column=2, sticky='nw')
         
         Button(self,  text="Print tags", command=lambda: \
                ejg.print_all_tags())\

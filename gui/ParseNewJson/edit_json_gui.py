@@ -1,4 +1,3 @@
-import tkinter
 from tkinter import ttk, messagebox, StringVar, Canvas
 import os
 from functools import partial
@@ -8,11 +7,9 @@ from globals import room_id_to_color, room_name_to_id
 import globals as g 
 from GUI.Utils import find_tag
 
-
 from gui_path import env_path
 from Assets.Extraction.extraction import extraction_path, dump_path
 
-# ************** Variables that should be cleared when clear is clicked  ************** #
 room_map = {}
 edge_map = {}
 ed_rm_list = []
@@ -26,24 +23,23 @@ current_rectangle = None
 
 room_edge_selection = False
 room_index_together = None 
-"""room_index_together specifies selected index when using 'room_edge_selection' mode """
+"room_index_together specifies selected index when using 'room_edge_selection' mode "
 
 start_x = None
 start_y = None
 drag_mode = None  # 'first', 'second', or None
-canvas =  tkinter.Canvas
-combobox = tkinter.ttk.Combobox
+canvas =  Canvas
+combobox = ttk.Combobox
 
-# ************** Globals  ************** #
 units = 1  # pixels
 
-room_type_sv    = StringVar
+room_type_sv            = StringVar
 neigh_room_indexes_sv   = StringVar
 neigh_room_types_sv     = StringVar
 neigh_door_indexes_sv   = StringVar
 neigh_door_types_sv     = StringVar
-selected_index_sv  = StringVar
-selected_type_sv   = StringVar
+selected_index_sv       = StringVar
+selected_type_sv        = StringVar
 
 MAX_X = 0
 MAX_Y = 0
@@ -61,18 +57,18 @@ def init_gui(edit_json_frame, width, height, _reorganized_json, command:str):
     MAX_Y = height-100
     reorganized_json = _reorganized_json
 
-    canvas = tkinter.Canvas(edit_json_frame, width=MAX_X, height=MAX_Y, bg="white")
+    canvas = Canvas(edit_json_frame, width=MAX_X, height=MAX_Y, bg="white")
     canvas.grid(row=0, column=0, sticky="nswe")
 
     if command != "clear":
-        room_type_sv = tkinter.StringVar()  
-        neigh_door_indexes_sv = tkinter.StringVar()
-        neigh_room_types_sv = tkinter.StringVar()
-        neigh_room_indexes_sv = tkinter.StringVar()
-        neigh_door_types_sv = tkinter.StringVar()
-        selected_edge = tkinter.StringVar()
-        selected_index_sv = tkinter.StringVar()
-        selected_type_sv = tkinter.StringVar()
+        room_type_sv = StringVar()  
+        neigh_door_indexes_sv = StringVar()
+        neigh_room_types_sv = StringVar()
+        neigh_room_indexes_sv = StringVar()
+        neigh_door_types_sv = StringVar()
+        selected_edge = StringVar()
+        selected_index_sv = StringVar()
+        selected_type_sv = StringVar()
 
         draw_boxes(reorganized_json)
         draw_edges(reorganized_json)
@@ -242,10 +238,7 @@ def draw_random_door(direction):
                         [rd[2],rd[3],rd[2],rd[1],door_type, int(room_types[2])],
                         [rd[2],rd[1],rd[0],rd[1],door_type, int(room_types[3])]]
 
-    # a door's index is num of rooms+doors+1
-    # but at the end, a new order is formed so in the beginning "doors" starts from key 1
     new_door_index = len(reorganized_json["rooms"])+len(reorganized_json["doors"])
-    
     try:
         reorganized_json["doors"].update({new_door_index:{"boxes":random_door, "edges":[], "ed_rm":[], 
                                                       "room_type":room_type_sv.get()}})
@@ -259,11 +252,7 @@ def draw_random_door(direction):
     if room_types[0] == '' or room_indexes[0] == '':
         messagebox.showerror("please fill entries", "no neighbors were added in entries")
 
-    # update_edges_and_ed_rm_to_add_random_door(door_index, door_type, room_types, room_indexes)
     draw_random_box(random_door, door_type, new_door_index)
-
-
-    # draw_random_edge(random_edges,new_door_index,"doors",door_type,new_together_door_index)
     draw_random_edge(random_edges=random_edges,
                      box_index=new_door_index,
                      rooms_or_doors="doors",
@@ -315,7 +304,7 @@ def draw_random_room():
                     [450,130,450,90,room_type, int(room_types[2])],
                     [450,90,400,90,room_type, int(room_types[3])]]
     
-    # room index twice is sent twice because of functionality related with draW_random_edge for doors
+    # room index twice is sent twice because of functionality related with draw_random_edge for doors
     draw_random_edge(random_edges=random_edges, 
                      box_index=room_index, 
                      rooms_or_doors="rooms", 
@@ -397,7 +386,7 @@ def on_clear(edit_json_frame, system_clear=False):
     start_x = start_y = current_edge = current_rectangle = room_index_together = None
     drag_mode = None  # 'first', 'second', or None
 
-    canvas =  tkinter.Canvas
+    canvas =  Canvas
     combobox = ttk.Combobox
 
     if not system_clear:
@@ -461,17 +450,15 @@ def find_dir(index):
 
 def update_edges_and_ed_rm_to_add_random_room(room_index, room_type, room_types, room_indexes, door_indexes, door_types):
     """Update ed_rm and edges according to user's input when adding a new room.
-    This algorithm actually works if the neighbors are doors or rooms because only neighbors are being updated.
-    so if a door neighbor is updated, then the door's neighbor will be a room V
-    and if a room neighbor is updates, then the room's neighbor will be a room V
-    function is not changed for an addition of a room. pretty tricky concept."""
+    If a door neighbor is updated, then the door's neighbor will be a room
+    If a room neighbor is updated, then the room's neighbor will be a room
+    function is not changed for an addition of a room."""
     global reorganized_json
 
     for i, index in enumerate(room_indexes):
         if index == 'N' or index == 'n':
             continue
         index = int(index)
-        type = int(room_types[i])
 
         dir=find_dir(i)
         reorganized_json["rooms"][index]["ed_rm"][dir] = [index, room_index]
@@ -481,7 +468,6 @@ def update_edges_and_ed_rm_to_add_random_room(room_index, room_type, room_types,
         if index == 'N' or index == 'n':
             continue
         index = int(index)
-        type = int(door_types[i])
 
         dir=find_dir(i)
         reorganized_json["doors"][index]["ed_rm"][dir] = [index, room_index]
@@ -490,7 +476,7 @@ def update_edges_and_ed_rm_to_add_random_room(room_index, room_type, room_types,
 def append_ed_rm_list(room_index, neigh_room_indexes):
     res = []
 
-    for i, neigh_index in enumerate(neigh_room_indexes):
+    for neigh_index in neigh_room_indexes:
         if neigh_index == 'N' or neigh_index == 'n':
             res.append([int(room_index)])
         else:
@@ -546,7 +532,6 @@ def on_mouse_down(event):
             selected_type_sv.set(value=room_type+g.room_id_to_name(room_type))
         except Exception as e:
             traceback.format_exc(e)
-
 
     start_x, start_y = event.x, event.y
     try:
@@ -647,12 +632,11 @@ def on_mouse_up(event):
                 except Exception as ex:
                     print(f"{g.RED}Error in on_mouse_up: {ex}{g.RESET}")
 
-        # current_rectangle = None
 
 def start_drag(event):
     global start_x, start_y, current_edge, drag_mode, selected_edge, canvas
      
-    item = canvas.find_closest(event.x, event.y)[0]  # Find the closest item to the click
+    item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
     if "edge" in tags:
         start_x, start_y = event.x, event.y
@@ -677,7 +661,6 @@ def start_drag(event):
 
         canvas.itemconfig(current_edge, fill="green", width=2)
         line_coords = canvas.coords(current_edge)
-        # Determine if the click is near an endpoint
         drag_mode = is_close_to_endpoint(start_x, start_y, line_coords)
 
 def drag(event, _dx=None,_dy=None):
@@ -699,10 +682,10 @@ def drag(event, _dx=None,_dy=None):
         dx = event.x - start_x
         dy = event.y - start_y
 
-        if drag_mode == 'first':  # Dragging the first endpoint
+        if drag_mode == 'first':
             coords = canvas.coords(current_edge)
             canvas.coords(current_edge, event.x, event.y, coords[2], coords[3])
-        elif drag_mode == 'second':  # Dragging the second endpoint
+        elif drag_mode == 'second':
             coords = canvas.coords(current_edge)
             canvas.coords(current_edge, coords[0], coords[1], event.x, event.y)
         else:  # Moving the entire edge
@@ -738,28 +721,28 @@ def on_mouse_up_together(event):
     
 def move_up(event):
     global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, 0, -units)  # Move up by 'units' units
+    canvas.move(current_rectangle, 0, -units)
     canvas.move(f"label_box_index:{room_index_together}", 0, -units)
     canvas.move(f"edge_room_index:{room_index_together}", 0, -units)
     update_new_coords()
 
 def move_down(event):
     global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, 0, units)  # Move down by 10 units
+    canvas.move(current_rectangle, 0, units)
     canvas.move(f"label_box_index:{room_index_together}", 0, units)
     canvas.move(f"edge_room_index:{room_index_together}", 0, units)
     update_new_coords()
 
 def move_left(event):
     global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, -units, 0)  # Move left by 10 units
+    canvas.move(current_rectangle, -units, 0)
     canvas.move(f"label_box_index:{room_index_together}", -units, 0)
     canvas.move(f"edge_room_index:{room_index_together}", -units, 0)
     update_new_coords()
 
 def move_right(event):
     global current_rectangle, canvas, room_index_together
-    canvas.move(current_rectangle, units, 0)  # Move right by 10 units
+    canvas.move(current_rectangle, units, 0)
     canvas.move(f"label_box_index:{room_index_together}", units, 0)
     canvas.move(f"edge_room_index:{room_index_together}",  units, 0)
     update_new_coords()
@@ -806,31 +789,11 @@ def save_canvas():
     img = PilImage.open(canvas_ps_path)
     img.save(canvas_img_path, "png")
 
-def generate_floorplan(self, path, message_label_middle,notebook_plots):
-    global reorganized_json
-
-    from requests import post
-    from dotenv import load_dotenv
+def show_floorplan(self, path, message_label_middle,notebook_plots):
+    
     from PIL import Image, ImageTk
     from datetime import datetime
 
-    if len(reorganized_json["room_types"])!=0:
-        if not edge_map:
-            draw_edges(reorganized_json)
-        if not room_map:
-            draw_boxes(reorganized_json)
-
-    original_format_json = edit_json.deorganize_format(reorganized_json)
-    edit_json.dump_boxes(path, original_format_json)
-    load_dotenv(env_path)
-    url = os.getenv("URL")
-    result = post(url, json=original_format_json)
-
-    if result.status_code != 200:
-        message_label_middle.config(text="Error on request to server. Please try again.")
-        return
-    
-    handle_zip_file(result.content)
     save_canvas()
     
     timestamp = str(datetime.now().strftime("%H-%M-%S"))
@@ -852,7 +815,43 @@ def generate_floorplan(self, path, message_label_middle,notebook_plots):
     getattr(self, f"canvas_image_tk_label_{timestamp}").grid(row=0, column=1, sticky="nswe")
     getattr(self, f"fp_image_tk_label_{timestamp}").grid(row=0, column=0, sticky="nswe")
     getattr(self, f"graph_image_label_{timestamp}").grid(row=1, column=0, sticky="nswe")
+
+def preprocess_generation(path):
+    if len(reorganized_json["room_types"])!=0:
+        if not edge_map:
+            draw_edges(reorganized_json)
+        if not room_map:
+            draw_boxes(reorganized_json)
+
+    original_format_json = edit_json.deorganize_format(reorganized_json)
+    saved_path = edit_json.dump_boxes(path, original_format_json)
+    return original_format_json, saved_path
+
+def generate_floorplan(self, path, message_label_middle,notebook_plots):
+    global reorganized_json
+
+    from requests import post
+    from dotenv import load_dotenv
+
+    original_format_json, _ = preprocess_generation(path)
+    load_dotenv(env_path)
+    url = os.getenv("URL")
+    result = post(url, json=original_format_json)
+
+    if result.status_code != 200:
+        message_label_middle.config(text="Error on request to server. Please try again.")
+        return
     
+    handle_zip_file(result.content)
+    show_floorplan(self, path, message_label_middle,notebook_plots)
+    
+def generate_floorplan_local_model(self, path, message_label_middle,notebook_plots):
+    original_format_json, saved_path = preprocess_generation(path) # json is saved at 
+    from houseganapp_min.local_main import generate
+    generate(saved_path)
+    show_floorplan(self, path, message_label_middle,notebook_plots)
+
+
 def print_all_tags():
     global canvas
     for item in canvas.find_all():

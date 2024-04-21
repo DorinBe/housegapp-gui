@@ -21,6 +21,7 @@ def is_edge_inside_box(edge, box):
             y_min <= y1 <= y_max and y_min <= y2 <= y_max)
 
 def fix_difference_between_edge_to_box(edge, box):
+    """Function needs more refinement before it can be used."""
     replacedX = replacedY = False
     ex1, ey1, ex2, ey2 = edge[:4]
     bx1, by1, bx2, by2 = box
@@ -159,7 +160,6 @@ def deorganize_format(reorganized_json):
         original_json["edges"].extend(edges)
         original_json["ed_rm"].extend(ed_rm)
     
-    # last_room_index = list(reorganized_json["rooms"])[-1]
     for door in reorganized_json["doors"].items():        
         edges = door[1]["edges"]
         boxes = door[1]["boxes"]
@@ -171,7 +171,8 @@ def deorganize_format(reorganized_json):
         
     return original_json
 
-def dump_boxes(path, fixed_json):
+def dump_boxes(path, fixed_json)->str:
+    """returns the path of the saved file."""
     try:
         import os     
         path = os.path.dirname(path)
@@ -180,4 +181,4 @@ def dump_boxes(path, fixed_json):
             json.dump(fixed_json, file)
     except Exception as e:
         return traceback.format_exc(e)
-    return "File saved as " + path
+    return path
