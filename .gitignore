@@ -167,7 +167,7 @@ cython_debug/
 *.env
 /gui/Assets/Extraction/app/dump/*.png
 /gui/Assets/Extraction/app/dump/*.ps
-Assets/Extraction/*.zip
+/gui/Assets/Extraction/*.zip
 /Capstone Project Phase A-23-06-R-14.docx
 /Capstone Project Phase A-23-06-R-14.pdf
 /Capstone Project Phase A-23-06-R-14.pptx
