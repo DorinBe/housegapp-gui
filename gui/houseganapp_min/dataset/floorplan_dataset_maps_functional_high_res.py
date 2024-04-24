@@ -14,18 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json, os, random, math
+import json, random
 from collections import defaultdict
 import torch
 from torch.utils.data import Dataset
-import torchvision.transforms as T
-import math
 import numpy as np
-import PIL
-import glob
-from PIL import Image, ImageDraw, ImageOps, ImageFilter
-import random
-from houseganapp_min.misc.utils import ROOM_CLASS, ID_COLOR
+from PIL import Image, ImageDraw, ImageFilter
 
 def filter_graphs(graphs, min_h=0.03, min_w=0.03):
     new_graphs = []
@@ -452,7 +446,7 @@ def _augment(mks):
 		m_im = Image.fromarray(m.astype('uint8'))
 		m_im = m_im.rotate(rot)
 		if flip:
-			m_im = m_im.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+			m_im = m_im.transpose(Image.FLIP_LEFT_RIGHT)
 		new_mks.append(np.array(m_im))
 	new_mks = np.stack(new_mks)
 
