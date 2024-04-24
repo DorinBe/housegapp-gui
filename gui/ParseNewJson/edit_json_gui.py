@@ -358,11 +358,11 @@ def on_close(path, message_label_middle):
         # reorganized_json = edit_json.reorganize_json(reorganized_json)
         original_format_json = edit_json.deorganize_format(reorganized_json)
         new_path = edit_json.dump_boxes(path, original_format_json)
-        message_label_middle.config(text=new_path)
+        message_label_middle.config(text="Saved " + new_path)
     else:
         original_format_json = {"room_type":[], "boxes":[], "edges":[], "ed_rm":[]}
         new_path = edit_json.dump_boxes(path, original_format_json)
-        message_label_middle.config(text=new_path)
+        message_label_middle.config(text= "Saved " +new_path)
 
 
 def on_clear(edit_json_frame, system_clear=False):

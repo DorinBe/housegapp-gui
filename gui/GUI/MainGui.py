@@ -11,6 +11,7 @@ from ParseNewJson import edit_json, edit_json_gui
 from Assets.Photos import photos
 from Assets.Jsons import jsons
 from datetime import datetime
+import os
 
 
 MAX_X, MAX_Y = 1400, 800
@@ -54,20 +55,23 @@ class StartGUI(ttk.Frame):
     def open_file(self, extension, really_open=True):
         if really_open:
             title = "Please choose " + extension + " file to work with"
-            self.path = askopenfilename(filetypes=[("Custom Files:", extension)], title=title)
-            self.main_frame.path_label_middle.configure(text="You selected "+self.path)
+            self.path = askopenfilename(filetypes=[("Custom Files:", extension)], title=title)            
             if not self.path:
                 print(f"Error opening file {self.path}")
                 return
         else:
-            import os
             self.path = os.path.join(jsons.jsons_dir, str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + '.json')
-            self.main_frame.path_label_middle.configure(text="You selected "+self.path)
             with open(self.path, 'w') as file: # force new json file with empty data
                 file.write('{"room_type": [], "boxes": [], "edges": [], "ed_rm": []}')
+            self.path = self.path.replace(f'\\', '/')
 
-        file_path_name = self.path.split('.')[0]
-        extension = self.path.split('.')[1]
+        self.ano_path = ""
+        for p in self.path.split('/')[3:]:
+            self.ano_path = os.path.join(self.ano_path, p)
+
+        self.main_frame.path_label_middle.configure(text="Opened "+self.ano_path)
+        file_path_name = os.path.basename(self.path)
+        extension = os.path.splitext(self.path)[1]
 
         if not isinstance(self.edit_json_frame, MyFrame):
             self.edit_json_frame = MyFrame(self.notebook_plots)
@@ -75,13 +79,13 @@ class StartGUI(ttk.Frame):
             self.notebook_plots.add(self.edit_json_frame, text="Edit JSON") 
             self.notebook_plots.counter += 1
 
-        if extension == "json":
+        if extension == ".json":
             with open(self.path) as file:
                 original_data = json.load(file)
             reorganized_json = edit_json.reorganize_json(original_data)
             edit_json_gui.init_gui(self.edit_json_frame, MAX_X, MAX_Y, reorganized_json, "init")
             COF.CreateCanvasOptionsFrame(\
-                parent=self.edit_json_frame, file_path_name=file_path_name, reorganized_json=reorganized_json,\
+                parent=self.edit_json_frame, file_path_name=self.path, reorganized_json=reorganized_json,\
                 edit_json_frame=self.edit_json_frame, main_frame=self.main_frame, notebook_plots=self.notebook_plots)\
                 .grid(row=0, column=3, sticky='nw')
             CJF.CreateCanvasJsonFrame(self.edit_json_frame)\
