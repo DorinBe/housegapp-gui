@@ -80,7 +80,7 @@ def init_gui(edit_json_frame, width, height, _reorganized_json, command:str):
         draw_boxes(reorganized_json)
         draw_edges(reorganized_json)
 
-def draw_rectangle_and_label(canvas:Canvas, x1:float, y1:float, x2:float, y2:float, outline_color:str, box_index:int, box_type:int) -> int:
+def draw_rectangle_and_label(canvas:Canvas, x1:float, y1:float, x2:float, y2:float, outline_color:str, box_index:int, box_type:int, is_door:bool) -> int:
     """Input: canvas: canvas to draw on, 
     x1,y1,x2,y2: coordinates of the box,
     outline_color: outline colors of the box,
@@ -89,12 +89,14 @@ def draw_rectangle_and_label(canvas:Canvas, x1:float, y1:float, x2:float, y2:flo
     Returns the item_id of the rectangle drawn on the canvas."""
     box_id = canvas.create_rectangle(x1, y1, x2, y2, fill=outline_color, width=2, outline="black", tags=("box",
                                                                                                         f"room_index:{box_index}",
-                                                                                                        f"room_type:{box_type}"))
+                                                                                                        f"room_type:{box_type}",
+                                                                                                        f"is_door:{is_door}"))
     x, y = edit_json.calculate_average_of_box(box=(x1, y1, x2, y2))
     canvas.create_text(x, y, text=f"{box_index}", font=("Arial", 8), tags=("label",
                                                                             f"label_box_index:{box_index}",
                                                                             f"label_box_type:{box_type}",
-                                                                            f"label_box_id:{box_id}"))
+                                                                            f"label_box_id:{box_id}",
+                                                                            f"is_door:{is_door}"))
     return box_id
 
 def draw_boxes(data):
@@ -116,16 +118,17 @@ def draw_boxes(data):
         for room in {**data["rooms"],**data["doors"]}.items():
             room_index = room[0]
             room_type = room[1]["room_type"]
+            is_door = True if room_type > 11 else False
             room_color = room_id_to_color(room_type)
             
             box = room[1]["boxes"]
             x1, y1, x2, y2 = box
-            item_id = draw_rectangle_and_label(canvas, x1, y1, x2, y2, room_color, room_index, room_type)
+            item_id = draw_rectangle_and_label(canvas, x1, y1, x2, y2, room_color, room_index, room_type, is_door)
             room_map[item_id] = box
         
-    canvas.bind("<Button-1>", partial(on_mouse_down))
-    canvas.bind("<B1-Motion>", partial(on_mouse_move))
-    canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
+    # canvas.bind("<Button-1>", partial(on_mouse_down))
+    # canvas.bind("<B1-Motion>", partial(on_mouse_move))
+    # canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
 
 def draw_random_box(random_box, room_or_door_type, room_index):
         global canvas, reorganized_json, room_map
@@ -133,13 +136,14 @@ def draw_random_box(random_box, room_or_door_type, room_index):
         x1, y1, x2, y2 = random_box
         room_type = int(room_or_door_type)
         room_color = room_id_to_color(room_type)
-        box_id = draw_rectangle_and_label(canvas, x1, y1, x2, y2, room_color, room_index, room_type)
+        is_door = True if room_type > 11 else False
+        box_id = draw_rectangle_and_label(canvas, x1, y1, x2, y2, room_color, room_index, room_type, is_door)
         reorganized_json["room_types"].insert(room_index, room_type)
         room_map[box_id] = random_box
     
-        canvas.bind("<Button-1>", partial(on_mouse_down))
-        canvas.bind("<B1-Motion>", partial(on_mouse_move))
-        canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
+        # canvas.bind("<Button-1>", partial(on_mouse_down))
+        # canvas.bind("<B1-Motion>", partial(on_mouse_move))
+        # canvas.bind("<ButtonRelease-1>", partial(on_mouse_up))
         return room_index, room_or_door_type
 
 def draw_line(canvas:Canvas, x1:float, y1:float, x2:float, y2:float, room_index:int, is_door:bool, room_type:int, door_type:int=None) -> int:
@@ -153,7 +157,7 @@ def draw_line(canvas:Canvas, x1:float, y1:float, x2:float, y2:float, room_index:
     """
     line_id = canvas.create_line(x1, y1, x2, y2, fill="black", width=2, tags=("edge",
                                                                                 f"edge_room_index:{room_index}",
-                                                                                f"edge_is_door:{is_door}",
+                                                                                f"is_door:{is_door}",
                                                                                 f"door_type:{door_type}",
                                                                                 f"edge_room_type:{room_type}")) 
     return line_id
@@ -191,9 +195,9 @@ def draw_edges(data):
                 except Exception as e:
                     traceback.format_exc(e)
 
-    canvas.bind("<Button-1>", partial(start_drag))
-    canvas.bind("<B1-Motion>", partial(drag))
-    canvas.bind("<ButtonRelease-1>", partial(end_drag))
+    # canvas.bind("<Button-1>", partial(start_drag))
+    # canvas.bind("<B1-Motion>", partial(drag))
+    # canvas.bind("<ButtonRelease-1>", partial(end_drag))
 
 def draw_random_edge(random_edges,box_index, rooms_or_doors, together_room_index, door_type=None):
     global canvas, reorganized_json, edge_map
@@ -498,9 +502,25 @@ def on_mouse_down(event):
 
     item = canvas.find_closest(event.x, event.y)[0]
     tags = canvas.gettags(item)
-
-    room_index = find_tag("room_index", tags)
-    current_rectangle = canvas.find_withtag(f"room_index:{room_index}")[0]
+    match(tags[0]):
+        case "box":
+            room_index = find_tag("room_index", tags)
+        case "label":
+            room_index = find_tag("label_box_index", tags)
+        case "edge":
+            room_index = find_tag("edge_room_index", tags)
+        case default:
+            return
+    if room_index == None:
+        return
+    
+    try:
+        current_rectangle_notuple = canvas.find_withtag(f"room_index:{room_index}")
+        current_rectangle = current_rectangle_notuple[0]
+    except IndexError as e:
+        print(f"{g.RED} \
+              {current_rectangle_notuple}\n\
+              Error in on_mouse_down: {e}{g.RESET}")
     update_globals_and_visualize_selection(tags, room_index)
 
     start_x, start_y = event.x, event.y
@@ -527,7 +547,7 @@ def on_mouse_down(event):
         resize_edge = None
 
     action_type = "resize" if resize_edge else "move"
-    if bool(find_tag("edge_is_door:",tags)): # force door to only be moved and not resized.
+    if find_tag("is_door:",tags) != 'False': # force door to only be moved and not resized.
         action_type = "move"
     canvas.itemconfig(current_rectangle, outline="green")
     canvas.focus_set()

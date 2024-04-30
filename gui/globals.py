@@ -1,3 +1,5 @@
+import traceback
+
 # ANSI escape codes
 RED = '\033[31m'  # Red text
 GREEN = '\033[32m'  # Green text
@@ -50,9 +52,13 @@ def room_id_to_color(id: int) -> str:
     return room_color
 
 def room_id_to_name(id: int) -> str:
-    if type(id) != int:
-        id = int(id)
-    for name, room_id in ROOM_TYPES.items():
-        if room_id == id:
-            return name
+    try:
+        if type(id) != int:
+            id = int(id)
+        for name, room_id in ROOM_TYPES.items():
+            if room_id == id:
+                return name
+    except Exception as e:
+        print( f"{RED} {e} {RESET}")
+        traceback.print_exc(e)
     return "Unknown"
