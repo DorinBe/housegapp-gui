@@ -163,7 +163,6 @@ cython_debug/
 #.idea/
 
 *.json
-*.mp4
 *.env
 /gui/Assets/Extraction/app/dump/*.png
 /gui/Assets/Extraction/app/dump/*.ps
