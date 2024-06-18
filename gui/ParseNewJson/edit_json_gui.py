@@ -730,9 +730,9 @@ def move_edges_and_boxes_together():
     canvas.bind("<Right>", lambda event, u=units: move(event, u, 0))
 
 def create_new_tab(notebook_plots, name="Floor Plan"):
-    from GUI.AppWidgets import MyFrame
+    from GUI.Frames import WhiteBGFrame
     
-    frame = MyFrame(notebook_plots)
+    frame = WhiteBGFrame(notebook_plots)
     notebook_plots.tabs.append(frame)
     notebook_plots.add(frame, text=name)   
     notebook_plots.counter += 1 
