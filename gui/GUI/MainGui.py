@@ -1,11 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 from tkinter.filedialog import askopenfilename
-from PIL import ImageTk, Image
+
 import pyautogui as pg
-from GUI import AppWidgets, MainFrame, CanvasOptionsFrame as COF, CanvasJsonFrame as CJF, CanvasLegendFrame as CLF
-from GUI.AppWidgets import MyFrame
+from GUI import AppWidgets
+from GUI.AppWidgets import WhiteBGFrame, CreateEditCanvasFrame, CreateCanvasOptionsFrame, CreateCanvasLegendFrame, CreateMainFrame
 from GUI.Styles import MyStyle
+
 import json
 from ParseNewJson import edit_json, edit_json_gui
 from Assets.Photos import photos
@@ -33,14 +34,14 @@ class StartGUI(ttk.Frame):
         self.main_window = self.window
         self.num_of_rooms = 0
 
-        self.main_frame = MainFrame.CreateMainFrame(self.main_window)
+        self.main_frame = CreateMainFrame(self.main_window)
         self.configure_btns()
 
         # Notebooks
-        self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
+        self.notebook_plots = AppWidgets.ManagerScrollableNotebook(self.main_frame.right_frame)
         self.notebook_plots.grid(row=0, column=0, sticky="nswe")
 
-        self.edit_json_frame = MyFrame
+        self.edit_json_frame = WhiteBGFrame
 
     def configure_btns(self):
         self.main_frame.load_json_btn.configure(command=lambda: self.open_file(extension='json'))
@@ -73,8 +74,8 @@ class StartGUI(ttk.Frame):
         file_path_name = os.path.basename(self.path)
         extension = os.path.splitext(self.path)[1]
 
-        if not isinstance(self.edit_json_frame, MyFrame):
-            self.edit_json_frame = MyFrame(self.notebook_plots)
+        if not isinstance(self.edit_json_frame, WhiteBGFrame):
+            self.edit_json_frame = WhiteBGFrame(self.notebook_plots)
             self.notebook_plots.tabs.append(self.edit_json_frame)
             self.notebook_plots.add(self.edit_json_frame, text="Edit JSON") 
             self.notebook_plots.counter += 1
@@ -84,91 +85,33 @@ class StartGUI(ttk.Frame):
                 original_data = json.load(file)
             reorganized_json = edit_json.reorganize_json(original_data)
             edit_json_gui.init_gui(self.edit_json_frame, MAX_X, MAX_Y, reorganized_json, "init")
-            COF.CreateCanvasOptionsFrame(\
+            CreateCanvasOptionsFrame(\
                 parent=self.edit_json_frame, file_path_name=self.path, reorganized_json=reorganized_json,\
                 edit_json_frame=self.edit_json_frame, main_frame=self.main_frame, notebook_plots=self.notebook_plots)\
                 .grid(row=0, column=3, sticky='nw')
-            CJF.CreateCanvasJsonFrame(self.edit_json_frame)\
+            CreateEditCanvasFrame(self.edit_json_frame)\
                 .grid(row=1, column=0, sticky='nw')
-            CLF.CreateCanvasLegendFrame(self.edit_json_frame)\
+            CreateCanvasLegendFrame(self.edit_json_frame)\
                 .grid(row=0, column=2, sticky='nw')
         else:
             messagebox.showerror(message="Selected file is not supported.")
             return
 
-    # def signin_button(self):
-    #     self.selected.set(-1)
-    #     # self.main_frame.center_frame.grid_remove()
-
-    #     # create pop up window of sign in
-    #     self.signin_window = tk.Toplevel(self.main_window)
-    #     self.signin_window.title("Sign in")
-    #     # self.signin_window.geometry("350x200")
-    #     self.signin_window.resizable(False, False)
-
-    #     # create a frame for the sign in window
-    #     self.signin_frame = ttk.Frame(self.signin_window, style='Custom.TFrame')
-    #     self.signin_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")  # Add some padding
-    #     self.signin_frame.grid_columnconfigure(0, weight=1)  # Make the frame stretch when resizing
-    #     self.signin_frame.grid_rowconfigure(0, weight=1)  # Make the frame stretch when resizing
-    #     self.signin_frame.grid_propagate(True)  # Disable resizing the frame
-
-    #     # create a label for the sign in window
-    #     self.signin_label = ttk.Label(self.signin_frame, style="Settings.TLabel", text="Sign in", font=("Helvetica", 16))
-    #     self.signin_label.grid(row=0, column=0, columnspan=2, padx=(20,20), pady=(20,20))  # Let it span 2 columns and align to left
-
-    #     # create a label for the username
-    #     self.username_label = ttk.Label(self.signin_frame, style="Settings.TLabel", text="Username", font=("Helvetica", 12))
-    #     self.username_label.grid(row=1, column=0, sticky="w", padx=(20,20), pady=(0,0))  # Align to left
-
-    #     # create a label for the password
-    #     self.password_label = ttk.Label(self.signin_frame, style="Settings.TLabel", text="Password", font=("Helvetica", 12))
-    #     self.password_label.grid(row=2, column=0, sticky="w", padx=(20,20), pady=(0,20))  # Align to left
-
-    #     # create a entry for the username
-    #     self.username_entry = ttk.Entry(self.signin_frame, style="Settings.TEntry", font=("Helvetica", 12))
-    #     self.username_entry.grid(row=1, column=1, sticky="e", padx=(0,20), pady=(0,0))  # Align to right
-
-    #     # create a entry for the password
-    #     self.password_entry = ttk.Entry(self.signin_frame, style="Settings.TEntry", font=("Helvetica", 12))
-    #     self.password_entry.grid(row=2, column=1, sticky="e", padx=(0,20), pady=(0,20))  # Align to right
-
-    #     # create a button for the sign in
-    #     self.login_btn = ttk.Button(self.signin_frame, style="Pink.TButton", text="Login", command=self.login)
-    #     self.login_btn.grid(row=3, column=0, columnspan=2, padx=(20,20), pady=(0,20))  # Let it span 2 columns and align to right
-        
-    # # def login(self):
-    #     username = self.username_entry.get()
-    #     password = self.password_entry.get()
-
-    #     if username == "admin" and password == "admin":
-    #         self.signin_window.destroy()
-    #         self.main_frame.settings_btn['state'] = 'normal'
-    #         self.main_frame.download_btn['state'] = 'normal'
-    #         self.main_frame.plots_radio['state'] = 'normal'
-    #         self.main_frame.signin_btn['style'] = 'Green.TButton'
-    #         self.add_train_model_button()
-    #     else:
-    #         messagebox.showerror("Error", "Wrong username or password")
-
-    # # def add_train_model_button(self):
-    #     self.main_frame.train_model_btn.grid(row=6, column=0, padx=5, pady=5)
-
     def select_all(self):
         for btn in self.btns:
             btn.state(['selected'])
         self.notebook_plots = self.notebook_plots.destroy()
-        self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
+        self.notebook_plots = AppWidgets.ManagerScrollableNotebook(self.main_frame.right_frame)
 
     def deselect_all(self):
         for btn in self.btns:
             btn.state(['!selected'])
         self.notebook_plots = self.notebook_plots.destroy()
-        self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
+        self.notebook_plots = AppWidgets.ManagerScrollableNotebook(self.main_frame.right_frame)
 
     def update_select_plots(self, site_name, btn_state):
         self.notebook_plots = self.notebook_plots.destroy()
-        self.notebook_plots = AppWidgets.MyNotebook(self.main_frame.right_frame)
+        self.notebook_plots = AppWidgets.ManagerScrollableNotebook(self.main_frame.right_frame)
    
 def place_center(w1, width, height):  # Placing the window in the center of the screen
     reso = pg.size()
@@ -214,7 +157,6 @@ def show_hello_message(self):
     upload_btn.grid(row=0, column=1, sticky="n", pady=40)
     json_btn.grid(row=1, column=1, sticky="n", pady=40)
     login_btn.grid(row=0, column=2, sticky="n",padx=(0,200), pady=40)
-    # train_btn.grid(row=0, column=3, sticky="n", pady=40, padx=(0,100))
 
     
 
