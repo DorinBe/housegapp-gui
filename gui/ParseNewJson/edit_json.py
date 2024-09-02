@@ -171,8 +171,4 @@ def dump_boxes(path, fixed_json)->str:
     except Exception as e:
         return traceback.format_exc(e)
     
-    ano_path = ""
-    for p in path.split('/')[3:]:
-        ano_path = os.path.join(ano_path, p)
-
-    return ano_path
+    return path
