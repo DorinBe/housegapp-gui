@@ -164,6 +164,7 @@ cython_debug/
 
 *.json
 *.env
-/gui/Assets/Extraction/app/dump/*.png
-/gui/Assets/Extraction/app/dump/*.ps
-/gui/Assets/Extraction/*.zip
+/gui/assets/extraction/app/dump/*.png
+/gui/assets/extraction/app/dump/*.ps
+/gui/assets/extraction/*.zip
+/houseganpp/presentation
